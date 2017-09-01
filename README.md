@@ -10,8 +10,6 @@
 
 # Cold Storage
 
-Information is provided as-is .. use at your own risk.
-
 * Get a USB with a read-only switch
 * Install a bootable OS like Ubuntu onto the USB
 * Remove the hard-drive (any storage device) and wireless card from an old laptop or desktop
