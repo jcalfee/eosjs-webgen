@@ -1,6 +1,6 @@
 {
   "name": "eosjs-keygen",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "homepage": ".",
   "dependencies": {
     "eosjs-ecc": "^1.0.5",
