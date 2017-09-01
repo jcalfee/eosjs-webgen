@@ -1,0 +1,20 @@
+{
+  "name": "eosjs-keygen",
+  "version": "0.1.0",
+  "homepage": ".",
+  "dependencies": {
+    "eosjs-ecc": "^1.0.5",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-qr": "0.0.2",
+    "react-scripts": "1.0.12"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build && standalone build/index.html -o build/eosjs-keygen.html && sha256sum build/eosjs-keygen.html",
+    "test": "react-scripts test --env=jsdom"
+  },
+  "devDependencies": {
+    "standalone-html": "^0.2.1"
+  }
+}

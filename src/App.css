@@ -1,0 +1,47 @@
+.App {
+  text-align: center;
+}
+
+.App-body {
+  text-align: left;
+  margin-left: 2em;
+  margin-right: 2em;
+}
+
+.App-logo {
+  /*animation: App-logo-spin infinite 20s linear;*/
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-intro {
+  font-size: large;
+  margin-top: 1em;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/**
+  Display important information (like a private key) in a way that it can be
+  safely copied.
+
+  A non-form component is used:
+  * prevent accidental submission to a server
+  * may select and copy multiple element
+*/
+.CopyText {
+  background-color: lightyellow;
+  border: 1px solid blue;
+  padding-left: .5em;
+  padding-right: .5em;
+  font-family: monospace;
+}
