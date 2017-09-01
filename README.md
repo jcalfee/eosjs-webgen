@@ -1,25 +1,26 @@
-
 # EOS Wallet Key Generator
 
 # Usage
 
 * Download `eosjs-keygen.html` from [releases](https://github.com/jcalfee/eosjs-keygen/releases)
 * Perform desired level of security
-  * Verify the code and build/relase hash
+  * Verify the code and build/release hash
   * Use from cold storage
 
 # Cold Storage
+
+Here is one version of Cold Storage which I think is relatively simple given the tools available.
 
 * Get a USB with a read-only switch
 * Install a bootable OS like Ubuntu onto the USB
 * Remove the hard-drive (any storage device) and wireless card from an old laptop or desktop
 * Put the USB in read-only mode and boot
-* Connect to the Internet if desired to load any software or tools needed
-* Unplug the Internet (ethernet cable) and work with your sofware and private keys
-* Use a second writable USB and optinally a printer for a backup
+* Connect to the Internet if desired, load any software or tools needed
+* Unplug the Internet (ethernet cable) and work with your software and private keys
+* Use a second writable USB for a backup
 * Power off
 
-Never re-connect the Internet after working with private keys. Power off the computer when done.
+Never re-connect the Internet after working with private keys.
 
 # Todo
 
