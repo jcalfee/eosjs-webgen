@@ -46,7 +46,7 @@ The build script runs `sha256sum build/eosjs-keygen.html`
 You should see a sha256 hash and a eosjs-keygen.html file.  For example, v1.0.0 should hash too:
 
 ```bash
-9dbf248d0e7e10fd8e06a6761afc444a1d1d9f09281ee9213d40def92565e9c4  build/eosjs-keygen.html
+3d87f79639fa3aceaadd217b40c9e07bd0ecedc889de64cd4334eac26f66076f  build/eosjs-keygen.html
 ```
 
 This should match the release hash at github and the hash on Steemit.
