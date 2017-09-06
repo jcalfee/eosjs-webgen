@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import QRCode from 'react-qr';
 
-import logo from './logo.png';
+import logo from './LogoData';
 import './App.css';
 import './spinner.css';
 
@@ -25,7 +25,7 @@ class App extends Component {
         const wif = priv.toString()
         const pubkey = priv.toPublic().toString()
         this.setState({generating: false, wif, pubkey})
-      })
+      }, 100)
     })
   }
 
