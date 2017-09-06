@@ -41,12 +41,12 @@ npm install
 npm run build
 ```
 
-The build script runs `sha256sum build/eosjs-keygen.html`
+The build script runs `sha256sum eosjs-keygen.html`
 
 You should see a sha256 hash and a eosjs-keygen.html file.  For example, v1.0.0 should hash too:
 
 ```bash
-3d87f79639fa3aceaadd217b40c9e07bd0ecedc889de64cd4334eac26f66076f  build/eosjs-keygen.html
+3d87f79639fa3aceaadd217b40c9e07bd0ecedc889de64cd4334eac26f66076f  eosjs-keygen.html
 ```
 
 This should match the release hash at github and the hash on Steemit.

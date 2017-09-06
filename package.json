@@ -11,7 +11,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && standalone build/index.html -o build/eosjs-keygen.html && sha256sum build/eosjs-keygen.html",
+    "build": "react-scripts build && standalone build/index.html -o eosjs-keygen.html && sha256sum eosjs-keygen.html",
     "test": "react-scripts test --env=jsdom"
   },
   "devDependencies": {
