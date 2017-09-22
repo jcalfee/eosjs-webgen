@@ -98,18 +98,16 @@ export default class App extends Component {
 
         <div className="App-body">
           {mnemonic && <div>
-            <DivSelect>
-              <span className="btn-clipboard"/>
-              <MnemonicKeyCard {...{mnemonic, hint, isBip39}}/>
+            <span className="btn-clipboard"/>
+            <MnemonicKeyCard {...{mnemonic, hint, isBip39}}/>
+            <br />
+            <br />
+            {wif && <div>
+              <PrivateKeyCard {...{wif, pubkey, hint}}/>
               <br />
               <br />
-              {wif && <div>
-                <PrivateKeyCard {...{wif, pubkey, hint}}/>
-                <br />
-                <br />
-                <PublicKeyCard {...{pubkey, hint}} />
-              </div>}
-            </DivSelect>
+              <PublicKeyCard {...{pubkey, hint}} />
+            </div>}
   
             {!wif && <div>
                 <EnterPasswordForm onSubmit={this.onSubmitPassword}/>
@@ -362,12 +360,10 @@ const selectAll = e => {
   range.selectNodeContents(element)
   selection.removeAllRanges()
   selection.addRange(range)
+  
+  // document.execCommand('copy') // 
 }
 
 const SpanSelect = ({children, ...childProps}) => {
   return <span onClick={selectAll} {...childProps}>{children}</span>
-}
-
-const DivSelect = ({children, ...childProps}) => {
-  return <div onClick={selectAll} {...childProps}>{children}</div>
 }
