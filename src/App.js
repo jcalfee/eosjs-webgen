@@ -1,33 +1,52 @@
-import React, { Component } from 'react';
-import { Form, Input, Textarea } from 'formsy-react-components'
-
 import './App.css';
 import './bootstrap.css';
 import logo from './LogoData';
 
+import React, { Component } from 'react';
+
+import { Form, Input, Textarea } from 'formsy-react-components'
+
+import createHistory from 'history/createBrowserHistory'
+
 import QRCode from 'react-qr';
 import {PrivateKey, key_utils} from 'eosjs-ecc';
+import Identicon from './Identicon'
 
 import {randomMnemonic} from './mnemonic'
 import {suggest, validSeed, normalize, bip39} from 'bip39-checker'
 import {confirmAlert} from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
+const history = createHistory()
+let cpuEntropyBits
+
 export default class App extends Component {
+
+  static initialState = {entropyCount: 0}
 
   constructor() {
     super()
-    this.state = {entropyCount: 0}
+    this.state = App.initialState
+  }
+
+  componentWillMount() {
+    // cpuEntropyBits = 0 // fast weeker key (for development only) 
+    // this.newWallet() // short-cuts for development only
+    // this.onSubmitPassword({password: '', hint: ''}) 
   }
 
   componentDidMount() {
-    // this.newWallet() // short-cut (development only)
+    history.listen((location, action) => {
+      // console.log(action, location.pathname, location.state)
+      if(action === 'POP') {
+        if(this.state.mnemonic) {
+          this.state = App.initialState
+          this.setState()
+        }
+      }
+    })
   }
 
-  // clearKeyPair = () => {
-  //   this.setState({wif: null, pubkey: null})
-  // }
-  
   onEntropyEvent = e => {
     if(e.type === 'mousemove') {
       key_utils.addEntropy(e.pageX, e.pageY, e.screenX, e.screenY)
@@ -38,36 +57,48 @@ export default class App extends Component {
   }
 
   newWallet = () => {
-    this.setState({generating: true}, () => {
-      setTimeout(() => {
-        const mnemonic = randomMnemonic(24, 0)
-        this.setState({ generating: false, mnemonic, isBip39: true })
-      }, 100)
-    })
+    const waitForRenderMs = 100
+    this.setState(
+      {generating: true},
+      () => {setTimeout(() => {go()}, waitForRenderMs)}
+    )
+    const go = () => {
+      const mnemonic = randomMnemonic(24, cpuEntropyBits)
+      this.setState(
+        {generating: false, mnemonic, isBip39: true},
+        () => {history.push()}
+      )
+    }
   }
 
   openWallet = (mnemonic, isBip39) => {
-    this.setState({ mnemonic, isBip39 })
+    this.setState({ mnemonic, isBip39 }, () => {
+      history.push()
+    })
   }
 
   onSubmitPassword = ({password, hint}) => {
     const {mnemonic} = this.state
-    const {wif, pubkey} = mnemonicKeyPair(mnemonic, password)
-    this.setState({wif, pubkey, hint})
+    const {wif, pubkey, accountId} = mnemonicKeyPair(mnemonic, password)
+    this.setState({wif, pubkey, accountId, hint})
   }
 
   render() {
-    const {generating, mnemonic, isBip39, wif, pubkey, hint, entropyCount} = this.state
+    const {generating, entropyCount} = this.state
+    const {mnemonic, isBip39} = this.state
+    const {wif, pubkey, hint, accountId} = this.state
 
     return (
-      <div className="App" onMouseMove={this.onEntropyEvent}>
+      <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h3>Wallet Key Tool</h3>
         </div>
+        <br />
         
-        <div className="App-intro">
-          {!mnemonic && !generating && <div className="container">
+        {!mnemonic && !generating &&
+        <div className="App-intro" onMouseMove={this.onEntropyEvent}>
+          <div className="container">
             <div className="row">
               <div className="col border border-info rounded">
                 <fieldset>
@@ -88,38 +119,39 @@ export default class App extends Component {
                 <OpenWalletForm onSubmit={this.openWallet} />
               </div>
             </div>
+          </div>
+        </div>}
+
+        {generating && <div className="App-intro">
+          <h3>Creating Key</h3>
+          <br/>
+          Gathering entropy&hellip;
+        </div>}
+
+        {mnemonic && <div className="App-body">
+          {!accountId && <div>
+            <EnterPasswordForm onSubmit={this.onSubmitPassword}/>
           </div>}
-        </div>
 
-        <div className="App-intro">
-          {generating ? <div>Gathering CPU Entropy&hellip;</div> : <div>&nbsp;</div>}
-
-        </div>
-
-        <div className="App-body">
-          {mnemonic && <div>
-            <span className="btn-clipboard"/>
-            <MnemonicKeyCard {...{mnemonic, hint, isBip39}}/>
+          {accountId && <div>
+            <MnemonicKeyCard {...{mnemonic, hint, isBip39, accountId}}/>
             <br />
             <br />
-            {wif && <div>
-              <PrivateKeyCard {...{wif, pubkey, hint}}/>
+            {/*<div>
+              <PrivateKeyCard {...{wif, pubkey, hint, accountId}}/>
               <br />
               <br />
               <PublicKeyCard {...{pubkey, hint}} />
-            </div>}
-  
-            {!wif && <div>
-                <EnterPasswordForm onSubmit={this.onSubmitPassword}/>
-            </div>}
+            </div>*/}
           </div>}
-        </div>
-        <br /><br /><br />
+        </div>}
+        <br />
+        <br />
+        <br />
       </div>
-    );
+    )
   }
 }
-// <button onClick={this.clearKeyPair}>Clear</button>
 
 const OpenWalletForm = (props) => {
   const submit = ({mnemonic}) => {
@@ -184,25 +216,25 @@ class EnterPasswordForm extends React.Component {
     this.passwordRef.element.focus()
   }
 
-  submit = ({password, hint = password === '' ? 'empty' : ''}) =>
+  submit = ({password, hint = 'empty'}) =>
     this.props.onSubmit({password, hint})
 
   render = () => (
     <fieldset>
-      <legend>Enter Password</legend>
+      <legend>Create Passphrase</legend>
+
+      Create a short passphrase that will be easy to remember.  This is not the 
+      same as a typical password (see points below).  This will be combined with a very
+      strong Mnemonic Phrase and used to create your private credentials.
+      <br />
       <br />
 
-      Create a password to add security to your backup.  This is not
-      a typical password, see the notes below.  You'll be provided
-      a Mnemonic Key in the next step.
-      <br />
-      <br />
       <Form onValidSubmit={this.submit}>
         <fieldset>
-          <legend>Password (optional)</legend>
+          <legend>Passphrase (optional)</legend>
           <br />
           <Input
-            type="password" name="password" label="Password"
+            type="password" name="password" label="Passphrase"
             value="" autoComplete="off"
             componentRef={component => {
               this.passwordRef = component
@@ -219,23 +251,24 @@ class EnterPasswordForm extends React.Component {
           />
 
           <ul>
-            <li>Every password is valid (including no password)</li>
-            <li>Every password will create a different private key</li>
-            <li>This password acts like an additional word added the Mnemonic Key</li>
-            <li>Consider a password you can share with those you trust</li>
-            <li>No password, no private key, no funds</li>
+            <li>Every passphrase creates different credentials</li>
+            <li>Every passphrase is valid (including no passphrase)</li>
+            <li>This passphrase acts like an additional word added the Mnemonic Key</li>
+            <li>Consider a passphrase you can share with those you trust</li>
+            <li>No passphrase, no private key, no funds</li>
             <li>Password is case sensitive</li>
           </ul>
         </fieldset>
         <br />
 
         <fieldset>
-          <legend>Password Hint (optional)</legend>
-          This will appear on your backup.
+          <legend>Passphrase Hint (recommended)</legend>
+          This will appear on your backup.  The passphrase is very important,
+          this hint is recommended.
           <br />
           <br />
 
-          <Input name="hint" label="Password Hint" />
+          <Input name="hint" label="Passphrase Hint" />
         </fieldset>
         <br />
 
@@ -249,7 +282,7 @@ class EnterPasswordForm extends React.Component {
 }
 // formNoValidate
 
-const MnemonicKeyCard = ({mnemonic, hint, isBip39}) => (
+const MnemonicKeyCard = ({mnemonic, hint, isBip39, accountId}) => (
   <fieldset>
     {!isBip39 && <div>
       <h3>
@@ -268,16 +301,22 @@ const MnemonicKeyCard = ({mnemonic, hint, isBip39}) => (
           <small>[{isBip39 ? 'Bip39' : 'Unchecked'}] Starts With: {mnemonic.split(' ').slice(0, 3).join(' ')} &hellip;</small>
         </fieldset>
       </div>
-      <div className="col">
+      <div className="col-8">
         <fieldset>
           <legend>Private Mnemonic Phrase <small>({isBip39 ? 'Bip39' : 'Unchecked'})</small></legend>
+
+          <div style={{float: 'right'}}>
+            <AccountIcon accountId={accountId} />
+          </div>
           <SpanSelect className="CopyText">{mnemonic}</SpanSelect>
+
           <ul>
-            <li>You are the key keeper, no phrase no funds</li>
             <li>Carefully write down all 24 words in order</li>
-            {hint && <li>Write down your Password Hint: "<u>{hint}</u>"</li>}
+            <li>Write down your Password Hint: <u>{hint}</u></li>
+            <li>Write down your Account ID: <u>{accountId}</u></li>
+            <li>If saving on a USB or Removable drive, safely eject and re-open</li>
             <li>Your funds could be stolen if you use your mnemonic key on a malicious/phishing site</li>
-            <li>USB or Removable drives: safely eject then re-open to verify</li>
+            <li>You are the only person with this key, no phrase or password no funds</li>
           </ul>
         </fieldset>
       </div>
@@ -286,7 +325,27 @@ const MnemonicKeyCard = ({mnemonic, hint, isBip39}) => (
 )
 // <li>Secure this information as if it were worth your weight in gold</li>
 
-const PrivateKeyCard = ({wif, pubkey, hint}) => (
+const AccountIcon = ({accountId}) => {
+  let hash = accountId.toString(16)
+  // jdenticon requires 11 characters minimum
+  // hash = '0'.repeat(9 - hash.length) + hash
+  return (
+    <div className="container">
+      <div className="row">
+        <div className="col">
+          <Identicon hash={hash} />
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <p className="text-center">Acct: {accountId}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const PrivateKeyCard = ({wif, pubkey, hint, accountId}) => (
   <fieldset>
     <div className="row">
       <div className="col-4">
@@ -306,7 +365,8 @@ const PrivateKeyCard = ({wif, pubkey, hint}) => (
         </fieldset>
         <br/>
         <ul>
-          <li>Password Hint: "<u>{hint}</u>"</li>
+          <li>Password Hint: <u>{hint}</u></li>
+          <li>Account ID: <u>{accountId}</u></li>
           <li>Your funds will be stolen if you use your private key on a malicious/phishing site.</li>
           <li><small>Corresponding Public Key: {pubkey}</small></li>
         </ul>
@@ -345,10 +405,14 @@ const PublicKeyCard = ({pubkey, hint}) => (
 const mnemonicKeyPair = (mnemonic, password) => {
   const I = bip39.mnemonicToSeed(mnemonic, password)
   const IL = I.slice(0, 32)
+  const IR = I.slice(32)
+
   const privateKey = PrivateKey.fromBuffer(IL)
   const wif = privateKey.toString()
   const pubkey = privateKey.toPublic().toString()
-  return {wif, pubkey}
+  const accountId = IR.readUInt16LE(0)
+
+  return {wif, pubkey, accountId}
 }
 
 const selectAll = e => {
