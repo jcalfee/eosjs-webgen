@@ -163,7 +163,7 @@ const OpenWalletForm = (props) => {
           <div className="col">
             <Textarea rows="2" cols="60" required
               name="mnemonic" label="Mnemonic Phrase"
-              help="Private Mnemonic Phrase (Bip39&nbsp;24&nbsp;words)"
+              help="Private Mnemonic Phrase (Bip39,&nbsp;24&nbsp;words)"
             />
           </div>
           <div className="col-2">
@@ -254,7 +254,7 @@ const MnemonicKeyCard = ({mnemonic, hint, isBip39}) => (
     {!isBip39 && <div>
       <h3>
         <p className="text-center text-warning text-dark">
-          <b>Warning: Non-Bip39 Mnemonic Phrase</b>
+          <b>Warning: Unchecked Mnemonic Phrase</b>
         </p>
       </h3>
     </div>}
@@ -265,12 +265,12 @@ const MnemonicKeyCard = ({mnemonic, hint, isBip39}) => (
           <legend style={{whiteSpace: 'nowrap'}}>Private Mnemonic Phrase</legend>
           <QRCode text={mnemonic}/>
           <br />
-          <small>[{isBip39 ? '' : 'Non-'}Bip39] Starts With: {mnemonic.split(' ').slice(0, 3).join(' ')} &hellip;</small>
+          <small>[{isBip39 ? 'Bip39' : 'Unchecked'}] Starts With: {mnemonic.split(' ').slice(0, 3).join(' ')} &hellip;</small>
         </fieldset>
       </div>
       <div className="col">
         <fieldset>
-          <legend>Private Mnemonic Phrase <small>({isBip39 ? '' : 'Non-'}Bip39)</small></legend>
+          <legend>Private Mnemonic Phrase <small>({isBip39 ? 'Bip39' : 'Unchecked'})</small></legend>
           <SpanSelect className="CopyText">{mnemonic}</SpanSelect>
           <ul>
             <li>You are the key keeper, no phrase no funds</li>
