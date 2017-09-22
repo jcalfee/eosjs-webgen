@@ -1,7 +1,8 @@
 /* eslint-env mocha */
 const ecc = require('eosjs-ecc')
 const assert = require('assert')
-const {randomMnemonic, normalize, bip39} = require('./mnemonic')
+const {normalize, bip39} = require('bip39-checker')
+const {randomMnemonic} = require('./mnemonic')
 
 describe('mnemonic', () => {
   const noCpuEntropy = 0
@@ -59,13 +60,6 @@ describe('mnemonic', () => {
     const privateKey = ecc.PrivateKey.fromBuffer(Buffer.from(privateKeyHex, 'hex'))
     assert(/^5[HJK]/.test(privateKey.toWif()))
     assert.equal(privateKeyHex, privateKey.toBuffer().toString('hex'))
-  })
-
-  it('Normalize', () => {
-    throws(() => normalize(), /seed string required/)
-    assert.equal('double spaces', normalize('double  spaces'), 'removes extra spaces')
-    assert.equal('lowercase', normalize('Lowercase'), 'lowercase')
-    assert.equal('trim', normalize('  trim  '), 'trim')
   })
 
 })

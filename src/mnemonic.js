@@ -1,8 +1,7 @@
-const bip39 = require('bip39')
+const {bip39} = require('bip39-checker')
 const {key_utils} = require('eosjs-ecc')
 
 module.exports = {
-  bip39,
 
   /**
     @arg {number} wordCount - commonly: 12, 18, or 24
@@ -43,27 +42,5 @@ module.exports = {
       console.error(error);
       throw error
     }
-  },
-
-  /**
-    @summary Character cleansing: printable characters, all lowercase, trim.
-
-    @description Filter and remove invalid characters or extraneous spaces
-    from BIP-0039 word phrases. Future implementation can assume that this
-    method will not change any word in the language files (@see bip39-checker)
-
-    @retrun {string} normalized seed
-  */
-  normalize: (seed) => {
-    if (typeof seed !== 'string') {
-      throw new TypeError('seed string required')
-    }
-
-    // TODO? use unorm module until String.prototype.normalize gets better browser support
-    seed = seed.normalize('NFKD')// Normalization Form: Compatibility Decomposition
-    seed = seed.replace(/\s+/g, ' ') // Remove multiple spaces in a row
-    seed = seed.toLowerCase()
-    seed = seed.trim()
-    return seed
   }
 }

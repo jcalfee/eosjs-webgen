@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Input } from 'formsy-react-components'
+import { Form, Input, Textarea } from 'formsy-react-components'
 
 import './App.css';
 import './bootstrap.css';
@@ -7,7 +7,11 @@ import logo from './LogoData';
 
 import QRCode from 'react-qr';
 import {PrivateKey, key_utils} from 'eosjs-ecc';
-import {randomMnemonic, normalize, bip39} from './mnemonic'
+
+import {randomMnemonic} from './mnemonic'
+import {suggest, validSeed, normalize, bip39} from 'bip39-checker'
+import {confirmAlert} from 'react-confirm-alert'
+import 'react-confirm-alert/src/react-confirm-alert.css'
 
 export default class App extends Component {
 
@@ -37,15 +41,13 @@ export default class App extends Component {
     this.setState({generating: true}, () => {
       setTimeout(() => {
         const mnemonic = randomMnemonic(24, 0)
-        this.setState({ generating: false, mnemonic })
+        this.setState({ generating: false, mnemonic, isBip39: true })
       }, 100)
     })
   }
 
-  openWallet = () => {
-    let mnemonic = this.refs.mnemonic.value
-    mnemonic = normalize(mnemonic)
-    this.setState({ mnemonic })
+  openWallet = (mnemonic, isBip39) => {
+    this.setState({ mnemonic, isBip39 })
   }
 
   onSubmitPassword = ({password, hint}) => {
@@ -55,7 +57,7 @@ export default class App extends Component {
   }
 
   render() {
-    const {generating, mnemonic, wif, pubkey, hint, entropyCount} = this.state
+    const {generating, mnemonic, isBip39, wif, pubkey, hint, entropyCount} = this.state
 
     return (
       <div className="App" onMouseMove={this.onEntropyEvent}>
@@ -83,16 +85,7 @@ export default class App extends Component {
             <br />
             <div className="row">
               <div className="col border border-info rounded">
-                <fieldset>
-                  <legend>Open Wallet</legend>
-                  <label>Private Mnemonic Phrase<br />
-                    <textarea ref="mnemonic" rows="4" cols="60" />
-                  </label>
-                  <br />
-                  <button onClick={this.openWallet}>Open</button>
-                  <br/>
-                  <br/>
-                </fieldset>
+                <OpenWalletForm onSubmit={this.openWallet} />
               </div>
             </div>
           </div>}
@@ -105,20 +98,18 @@ export default class App extends Component {
 
         <div className="App-body">
           {mnemonic && <div>
-            {wif && <div>
-              <DivSelect>
-                <span className="btn-clipboard"/>
-                <MnemonicKeyCard {...{mnemonic, hint, wif, pubkey}}/>
+            <DivSelect>
+              <span className="btn-clipboard"/>
+              <MnemonicKeyCard {...{mnemonic, hint, isBip39}}/>
+              <br />
+              <br />
+              {wif && <div>
+                <PrivateKeyCard {...{wif, pubkey, hint}}/>
                 <br />
                 <br />
-                {wif && <div>
-                  <PrivateKeyCard {...{wif, pubkey, hint}}/>
-                  <br />
-                  <br />
-                  <PublicKeyCard {...{pubkey, hint}} />
-                </div>}
-              </DivSelect>
-            </div>}
+                <PublicKeyCard {...{pubkey, hint}} />
+              </div>}
+            </DivSelect>
   
             {!wif && <div>
                 <EnterPasswordForm onSubmit={this.onSubmitPassword}/>
@@ -132,8 +123,65 @@ export default class App extends Component {
 }
 // <button onClick={this.clearKeyPair}>Clear</button>
 
-class EnterPasswordForm extends React.Component {
+const OpenWalletForm = (props) => {
+  const submit = ({mnemonic}) => {
+    mnemonic = normalize(mnemonic)
+    const v = validSeed(mnemonic)
+    if(v.valid) {
+      props.onSubmit(mnemonic, true)
+      return
+    }
 
+    let word, suggestions, wordIndex = 0
+    mnemonic.split(' ').find(el => {
+      wordIndex++
+      const res = suggest(el, {maxSuggestions: 5})
+      if(res !== true) {
+        word = el
+        if(res.length) {
+          suggestions = res.join(', ')
+        }
+        return true
+      }
+    })
+
+    confirmAlert({
+      title: 'Bad Phrase',
+      cancelLabel: 'Cancel',
+      confirmLabel: 'Continue Anyway',
+      message: `Error: ${v.error}`,
+      childrenElement: () => (<div>
+        {word ? <div>Invalid word #{wordIndex}: {word}<br/></div> : ''}
+        {suggestions ? <div>Suggestions: {suggestions}<br/></div> : ''}
+      </div>),
+      onConfirm: () => {props.onSubmit(mnemonic, false)}
+    })
+  }
+  return (
+    <Form onValidSubmit={submit} >
+      <fieldset>
+        <legend>Open Wallet</legend>
+        <div className="row">
+          <div className="col">
+            <Textarea rows="2" cols="60" required
+              name="mnemonic" label="Mnemonic Phrase"
+              help="Private Mnemonic Phrase (Bip39&nbsp;24&nbsp;words)"
+            />
+          </div>
+          <div className="col-2">
+            &nbsp;
+          </div>
+        </div>
+        <br />
+        <button>Open</button>
+        <br/>
+        <br/>
+      </fieldset>
+    </Form>
+  )
+}
+
+class EnterPasswordForm extends React.Component {
   componentDidMount() {
     this.passwordRef.element.focus()
   }
@@ -173,8 +221,8 @@ class EnterPasswordForm extends React.Component {
           />
 
           <ul>
+            <li>Every password is valid (including no password)</li>
             <li>Every password will create a different private key</li>
-            <li>A password will slow down someone attacking your Mnemonic Key</li>
             <li>This password acts like an additional word added the Mnemonic Key</li>
             <li>Consider a password you can share with those you trust</li>
             <li>No password, no private key, no funds</li>
@@ -203,26 +251,34 @@ class EnterPasswordForm extends React.Component {
 }
 // formNoValidate
 
-const MnemonicKeyCard = ({mnemonic, hint}) => (
+const MnemonicKeyCard = ({mnemonic, hint, isBip39}) => (
   <fieldset>
+    {!isBip39 && <div>
+      <h3>
+        <p className="text-center text-warning text-dark">
+          <b>Warning: Non-Bip39 Mnemonic Phrase</b>
+        </p>
+      </h3>
+    </div>}
+
     <div className="row">
       <div className="col">
         <fieldset>
           <legend style={{whiteSpace: 'nowrap'}}>Private Mnemonic Phrase</legend>
           <QRCode text={mnemonic}/>
           <br />
-          <small>[Bip39] Starts With: {mnemonic.split(' ').slice(0, 3).join(' ')} &hellip;</small>
+          <small>[{isBip39 ? '' : 'Non-'}Bip39] Starts With: {mnemonic.split(' ').slice(0, 3).join(' ')} &hellip;</small>
         </fieldset>
       </div>
       <div className="col">
         <fieldset>
-          <legend>Private Mnemonic Phrase <small>(Bip39)</small></legend>
+          <legend>Private Mnemonic Phrase <small>({isBip39 ? '' : 'Non-'}Bip39)</small></legend>
           <SpanSelect className="CopyText">{mnemonic}</SpanSelect>
           <ul>
             <li>You are the key keeper, no phrase no funds</li>
             <li>Carefully write down all 24 words in order</li>
-            <li>Write down your Password Hint: "<u>{hint}</u>"</li>
-            <li>Your funds could be <b>stolen</b> if you use your mnemonic key on a malicious/phishing site</li>
+            {hint && <li>Write down your Password Hint: "<u>{hint}</u>"</li>}
+            <li>Your funds could be stolen if you use your mnemonic key on a malicious/phishing site</li>
             <li>USB or Removable drives: safely eject then re-open to verify</li>
           </ul>
         </fieldset>
@@ -240,9 +296,9 @@ const PrivateKeyCard = ({wif, pubkey, hint}) => (
           <legend>Private Key</legend>
           <QRCode text={wif}/>
           <br />
-          <small><b>Wallet Import Format</b></small>
+          <small><b>Wallet Import Format &mdash; WIF</b></small>
           <br />
-          <small>Goes with Pubkey: {pubkey.substring(0, 8)}&hellip;</small>
+          <small>Corresponds to: {pubkey.substring(0, 7)}&hellip;</small>
         </fieldset>
       </div>
       <div className="col">
@@ -253,8 +309,8 @@ const PrivateKeyCard = ({wif, pubkey, hint}) => (
         <br/>
         <ul>
           <li>Password Hint: "<u>{hint}</u>"</li>
-          <li>Your funds will be <b>stolen</b> if you use your private key on a malicious/phishing site.</li>
-          <li><small>Corresponding public key: {pubkey}</small></li>
+          <li>Your funds will be stolen if you use your private key on a malicious/phishing site.</li>
+          <li><small>Corresponding Public Key: {pubkey}</small></li>
         </ul>
       </div>
     </div>
@@ -270,7 +326,7 @@ const PublicKeyCard = ({pubkey, hint}) => (
           <legend>Public Key</legend>
           <QRCode text={pubkey}/>
           <br />
-          <small>Pubkey: {pubkey.substring(0, 8)}&hellip;</small>
+          <small>Public Key {pubkey.substring(0, 7)}&hellip;</small>
         </fieldset>
       </div>
       <div className="col">
