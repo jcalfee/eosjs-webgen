@@ -2,7 +2,7 @@ import './App.css';
 import './bootstrap.css';
 import logo from './LogoData';
 
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import PropTypes from 'prop-types'
 
 import { Form, Input, Textarea } from 'formsy-react-components'
@@ -15,8 +15,8 @@ import QRCode from 'react-qr';
 import {PrivateKey, key_utils} from 'eosjs-ecc';
 import Identicon from './Identicon'
 
-import {randomMnemonic} from './mnemonic'
-import {suggest, validSeed, normalize, bip39} from 'bip39-checker'
+import {randomMnemonic, mnemonicKeyPair, mnemonicIv} from './mnemonic'
+import {suggest, validSeed, normalize} from 'bip39-checker'
 import ReactConfirmAlert, {confirmAlert} from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
@@ -155,13 +155,8 @@ export default class App extends Component {
 // <PrivateKeyCard {...{wif, pubkey, hint, accountId}}/>
 // <PublicKeyCard {...{pubkey, hint}} />
 
-// require('./OpenWallet.css')
+require('./OpenWallet.css')
 class OpenWalletForm extends Component {
-
-  constructor() {
-    super()
-    this.state = {}
-  }
 
   submit = ({mnemonic}) => {
     const {onSubmit} = this.props
@@ -197,17 +192,27 @@ class OpenWalletForm extends Component {
       </div>),
       onConfirm: () => {
         onSubmit(mnemonic, false)
-      },
-      // onCancel: () => { this.setState({qrReader: false}) }
+      }
     })
+  }
+
+  /**
+    Convert the mnemonic input to / from a password field.
+  */
+  eye = () => {
+    const mnEl = document.getElementById("openWalletMnemonic")
+    const hide = mnEl.type !== 'password' // Toggle
+    mnEl.setAttribute('type', hide ? 'password' : 'text')
+
+    const eyeEl = document.getElementById("OpenWallet_eye")
+    eyeEl.setAttribute('class', hide ? 'DisabledEye' : '')
   }
 
   scan = mnemonic => this.submit({mnemonic})
 
   render() {
-    const camera = <span>&#x1f4f7;</span>    
-
-    // const {qrReader} = this.state
+    const camera = <span>&#x1f4f7;</span>  
+    const eye = <span>&#x1f441;</span>
 
     return (
       <Form onValidSubmit={this.submit} >
@@ -218,6 +223,9 @@ class OpenWalletForm extends Component {
               <Input required type="input" id="openWalletMnemonic"
                 name="mnemonic" label="Mnemonic Phrase"
                 help="Private Mnemonic Phrase (Bip39,&nbsp;24&nbsp;words)"
+                addonAfter={
+                  <span id="OpenWallet_eye" onClick={this.eye}>{eye}</span>
+                }
               />
             </div>
             <div className="col-2">
@@ -241,18 +249,6 @@ class OpenWalletForm extends Component {
       </Form>
     )
   }
-  // Browser's could save the mnemonic (this may not be needed)..
-  // Chrome and FF will offer to rememer password even with no username.
-  // One click convert to password and submit did not work, two clicks where needed..
-  // Convert the input type into a password field.
-  // const mnemonicPassswordType = (hidden) => {
-  //   const el = document.getElementById("openWalletMnemonic")
-  //   const newType = hidden != null ?
-  //     hidden ? 'password': 'text' :
-  //     el.type === 'password' ? 'text' : 'password' // Toggle
-  // 
-  //   el.setAttribute('type', newType)
-  // }
 }
 
 const MnemonicKeyCard = ({mnemonic, isBip39}) => (
@@ -278,6 +274,9 @@ const MnemonicKeyCard = ({mnemonic, isBip39}) => (
         <fieldset>
           <legend>Private Mnemonic Phrase <small>({isBip39 ? 'Bip39' : 'Unchecked'})</small></legend>
 
+          <div style={{float: 'right'}}>
+            <MnemonicIcon mnemonic={mnemonic} />
+          </div>
           <SpanSelect className="CopyText">{mnemonic}</SpanSelect>
           <br />&nbsp;
           <ul>
@@ -367,9 +366,7 @@ class EnterPasswordForm extends React.Component {
 // <li>Secure this information as if it were worth your weight in gold</li>
 // <li>Write down your Passphrase Account ID: <u>{accountId}</u></li>
 // <li>Write down your Passphrase Hint: <u>{hint}</u></li>
-// <div style={{float: 'right'}}>
-//   <AccountIcon accountId={accountId} />
-// </div>
+
 
 const PasswordAccountLogin = ({accountId, hint, onSubmit}) => (
   <fieldset>
@@ -398,20 +395,26 @@ const PasswordAccountLogin = ({accountId, hint, onSubmit}) => (
   </fieldset>
 )
 
-const AccountIcon = ({accountId}) => {
-  let hash = accountId.toString(16)
-  // jdenticon requires 11 characters minimum
-  // hash = '0'.repeat(9 - hash.length) + hash
+
+class MnemonicIcon extends PureComponent {
+  render() {
+    const {mnemonic} = this.props
+    const mnemonicId = mnemonicIv(mnemonic, "mnemonicId").readUInt16LE(0)
+    return <AccountIcon label="Mnemonic " accountId={mnemonicId} />
+  }
+}
+
+const AccountIcon = ({label = "Acct ", accountId}) => {
   return (
     <div className="container">
       <div className="row">
         <div className="col">
-          <Identicon hash={hash} />
+          <Identicon hash={accountId} />
         </div>
       </div>
       <div className="row">
         <div className="col">
-          <p className="text-center">Acct: {accountId}</p>
+          <p className="text-center">{label}{accountId}</p>
         </div>
       </div>
     </div>
@@ -474,19 +477,6 @@ const PublicKeyCard = ({pubkey, hint}) => (
     </div>
   </fieldset>
 )
-
-const mnemonicKeyPair = (mnemonic, password) => {
-  const I = bip39.mnemonicToSeed(mnemonic, password)
-  const IL = I.slice(0, 32)
-  const IR = I.slice(32)
-
-  const privateKey = PrivateKey.fromBuffer(IL)
-  const wif = privateKey.toString()
-  const pubkey = privateKey.toPublic().toString()
-  const accountId = IR.readUInt16LE(0)
-
-  return {wif, pubkey, accountId}
-}
 
 const selectAll = e => {
   const element = e.target

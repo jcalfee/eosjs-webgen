@@ -9,11 +9,11 @@ export default class Identicon extends Component {
 
   static propTypes = {
     size: PropTypes.object.isRequired,
-    hash: PropTypes.string
+    hash: PropTypes.oneOf([PropTypes.string, PropTypes.number])
   }
 
   static defaultProps = {
-    size: {height: 100, width: 100}
+    size: {height: 130, width: 130}
   }
 
   constructor(props) {
@@ -40,6 +40,11 @@ export default class Identicon extends Component {
   render() {
     let {hash} = this.props;
     let {height, width} = this.props.size;
+
+    if(typeof hash === 'number') {
+      hash = String(hash)
+    }
+
     return (
       <canvas id={this.canvas_id}
         ref="canvas"
@@ -56,6 +61,7 @@ export default class Identicon extends Component {
     if(hash) {
       jdenticon.update('#' + this.canvas_id, hash);
     } else {
+      // empty placeholder
       let ctx = this.refs.canvas.getContext('2d');
       ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
       let size = ctx.canvas.width;

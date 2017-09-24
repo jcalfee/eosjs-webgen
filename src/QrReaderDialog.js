@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import QrReader from 'react-qr-reader'
 
-import ReactConfirmAlert, {confirmAlert} from 'react-confirm-alert'
+import ReactConfirmAlert from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
 export default class QrReaderDialog extends Component {
