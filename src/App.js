@@ -3,8 +3,11 @@ import './bootstrap.css';
 import logo from './LogoData';
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types'
 
 import { Form, Input, Textarea } from 'formsy-react-components'
+
+import QrReaderDialog from './QrReaderDialog'
 
 import createHistory from 'history/createBrowserHistory'
 
@@ -14,7 +17,7 @@ import Identicon from './Identicon'
 
 import {randomMnemonic} from './mnemonic'
 import {suggest, validSeed, normalize, bip39} from 'bip39-checker'
-import {confirmAlert} from 'react-confirm-alert'
+import ReactConfirmAlert, {confirmAlert} from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
 const history = createHistory()
@@ -30,9 +33,9 @@ export default class App extends Component {
   }
 
   componentWillMount() {
-    // cpuEntropyBits = 0 // fast weeker key (for development only) 
+    cpuEntropyBits = 0 // fast weeker key (for development only) 
     // this.newWallet() // short-cuts for development only
-    // this.onSubmitPassword({password: '', hint: ''}) 
+    // this.onSubmitPassword({password: '', hint: ''}) // dev only
   }
 
   componentDidMount() {
@@ -73,6 +76,12 @@ export default class App extends Component {
 
   openWallet = (mnemonic, isBip39) => {
     this.setState({ mnemonic, isBip39 }, () => {
+      history.push()
+    })
+  }
+
+  loginWallet = ({mnemonic, accountId}) => {
+    this.setState({ mnemonic, accountId }, () => {
       history.push()
     })
   }
@@ -119,46 +128,48 @@ export default class App extends Component {
                 <OpenWalletForm onSubmit={this.openWallet} />
               </div>
             </div>
+            {/*<div className="row">
+              <div className="col border border-info rounded">
+                <PasswordAccountLogin onSubmit={this.loginWallet} />
+              </div>
+            </div>*/}
           </div>
         </div>}
 
         {generating && <div className="App-intro">
-          <h3>Creating Key</h3>
+          <h3>Creating Mnemonic Phrase</h3>
           <br/>
           Gathering entropy&hellip;
         </div>}
 
         {mnemonic && <div className="App-body">
-          {!accountId && <div>
-            <EnterPasswordForm onSubmit={this.onSubmitPassword}/>
-          </div>}
-
-          {accountId && <div>
-            <MnemonicKeyCard {...{mnemonic, hint, isBip39, accountId}}/>
-            <br />
-            <br />
-            {/*<div>
-              <PrivateKeyCard {...{wif, pubkey, hint, accountId}}/>
-              <br />
-              <br />
-              <PublicKeyCard {...{pubkey, hint}} />
-            </div>*/}
-          </div>}
+          <MnemonicKeyCard {...{mnemonic, isBip39}}/>
+          <br />
+          <br />
         </div>}
-        <br />
-        <br />
-        <br />
       </div>
     )
   }
 }
+// <EnterPasswordForm onSubmit={this.onSubmitPassword}/>
+// <PrivateKeyCard {...{wif, pubkey, hint, accountId}}/>
+// <PublicKeyCard {...{pubkey, hint}} />
 
-const OpenWalletForm = (props) => {
-  const submit = ({mnemonic}) => {
+// require('./OpenWallet.css')
+class OpenWalletForm extends Component {
+
+  constructor() {
+    super()
+    this.state = {}
+  }
+
+  submit = ({mnemonic}) => {
+    const {onSubmit} = this.props
+
     mnemonic = normalize(mnemonic)
     const v = validSeed(mnemonic)
     if(v.valid) {
-      props.onSubmit(mnemonic, true)
+      onSubmit(mnemonic, true)
       return
     }
 
@@ -184,105 +195,67 @@ const OpenWalletForm = (props) => {
         {word ? <div>Invalid word #{wordIndex}: {word}<br/></div> : ''}
         {suggestions ? <div>Suggestions: {suggestions}<br/></div> : ''}
       </div>),
-      onConfirm: () => {props.onSubmit(mnemonic, false)}
+      onConfirm: () => {
+        onSubmit(mnemonic, false)
+      },
+      // onCancel: () => { this.setState({qrReader: false}) }
     })
   }
-  return (
-    <Form onValidSubmit={submit} >
-      <fieldset>
-        <legend>Open Wallet</legend>
-        <div className="row">
-          <div className="col">
-            <Textarea rows="2" cols="60" required
-              name="mnemonic" label="Mnemonic Phrase"
-              help="Private Mnemonic Phrase (Bip39,&nbsp;24&nbsp;words)"
-            />
-          </div>
-          <div className="col-2">
-            &nbsp;
-          </div>
-        </div>
-        <br />
-        <button>Open</button>
-        <br/>
-        <br/>
-      </fieldset>
-    </Form>
-  )
-}
 
-class EnterPasswordForm extends React.Component {
-  componentDidMount() {
-    this.passwordRef.element.focus()
-  }
+  scan = mnemonic => this.submit({mnemonic})
 
-  submit = ({password, hint = 'empty'}) =>
-    this.props.onSubmit({password, hint})
+  render() {
+    const camera = <span>&#x1f4f7;</span>    
 
-  render = () => (
-    <fieldset>
-      <legend>Create Passphrase</legend>
+    // const {qrReader} = this.state
 
-      Create a short passphrase that will be easy to remember.  This is not the 
-      same as a typical password (see points below).  This will be combined with a very
-      strong Mnemonic Phrase and used to create your private credentials.
-      <br />
-      <br />
-
-      <Form onValidSubmit={this.submit}>
+    return (
+      <Form onValidSubmit={this.submit} >
         <fieldset>
-          <legend>Passphrase (optional)</legend>
+          <legend>Open Wallet</legend>
+          <div className="row">
+            <div className="col">
+              <Input required type="input" id="openWalletMnemonic"
+                name="mnemonic" label="Mnemonic Phrase"
+                help="Private Mnemonic Phrase (Bip39,&nbsp;24&nbsp;words)"
+              />
+            </div>
+            <div className="col-2">
+              &nbsp;
+            </div>
+          </div>
           <br />
-          <Input
-            type="password" name="password" label="Passphrase"
-            value="" autoComplete="off"
-            componentRef={component => {
-              this.passwordRef = component
-            }}
-          />
 
-          <Input
-            type="password" name="confirm" label="Confirm"
-            value="" autoComplete="off"
-            validations="equalsField:password"
-            validationErrors={{
-              equalsField: 'Passwords must match.'
-            }}
-          />
+          <button>Open</button>
 
-          <ul>
-            <li>Every passphrase creates different credentials</li>
-            <li>Every passphrase is valid (including no passphrase)</li>
-            <li>This passphrase acts like an additional word added the Mnemonic Key</li>
-            <li>Consider a passphrase you can share with those you trust</li>
-            <li>No passphrase, no private key, no funds</li>
-            <li>Password is case sensitive</li>
-          </ul>
+          <QrReaderDialog scan={this.scan}
+            title="Private Mnemonic Phrase Reader"
+            message="Hold up your private mnemonic phrase QR code"
+            component={click =>
+              <button onClick={click}>QR ({camera})</button>
+            }/>
+          <br/>
+          <br/>
+
         </fieldset>
-        <br />
-
-        <fieldset>
-          <legend>Passphrase Hint (recommended)</legend>
-          This will appear on your backup.  The passphrase is very important,
-          this hint is recommended.
-          <br />
-          <br />
-
-          <Input name="hint" label="Passphrase Hint" />
-        </fieldset>
-        <br />
-
-        <input
-          className="btn btn-primary"
-          type="submit" defaultValue="Submit"
-        />
       </Form>
-    </fieldset>
-  )
+    )
+  }
+  // Browser's could save the mnemonic (this may not be needed)..
+  // Chrome and FF will offer to rememer password even with no username.
+  // One click convert to password and submit did not work, two clicks where needed..
+  // Convert the input type into a password field.
+  // const mnemonicPassswordType = (hidden) => {
+  //   const el = document.getElementById("openWalletMnemonic")
+  //   const newType = hidden != null ?
+  //     hidden ? 'password': 'text' :
+  //     el.type === 'password' ? 'text' : 'password' // Toggle
+  // 
+  //   el.setAttribute('type', newType)
+  // }
 }
-// formNoValidate
 
-const MnemonicKeyCard = ({mnemonic, hint, isBip39, accountId}) => (
+const MnemonicKeyCard = ({mnemonic, isBip39}) => (
   <fieldset>
     {!isBip39 && <div>
       <h3>
@@ -305,25 +278,125 @@ const MnemonicKeyCard = ({mnemonic, hint, isBip39, accountId}) => (
         <fieldset>
           <legend>Private Mnemonic Phrase <small>({isBip39 ? 'Bip39' : 'Unchecked'})</small></legend>
 
-          <div style={{float: 'right'}}>
-            <AccountIcon accountId={accountId} />
-          </div>
           <SpanSelect className="CopyText">{mnemonic}</SpanSelect>
-
+          <br />&nbsp;
           <ul>
             <li>Carefully write down all 24 words in order</li>
-            <li>Write down your Password Hint: <u>{hint}</u></li>
-            <li>Write down your Account ID: <u>{accountId}</u></li>
             <li>If saving on a USB or Removable drive, safely eject and re-open</li>
             <li>Your funds could be stolen if you use your mnemonic key on a malicious/phishing site</li>
-            <li>You are the only person with this key, no phrase or password no funds</li>
+            <li>You are the only person with this phrase, no phrase no funds</li>
           </ul>
         </fieldset>
       </div>
     </div>
   </fieldset>
 )
+
+class EnterPasswordForm extends React.Component {
+  componentDidMount() {
+    this.passwordRef.element.focus()
+    // this.passwordRef.element.getDOMNode().value = 'hi'
+  }
+
+  submit = ({password, hint = 'empty'}) =>
+    this.props.onSubmit({password, hint})
+
+  render = () => (
+    <fieldset>
+      <legend>Create Passphrase</legend>
+
+      Create a short passphrase that will be easy to remember.  This is not the 
+      same as a typical password (see points below).
+      <br />
+      <br />
+
+      <Form onValidSubmit={this.submit}>
+        <fieldset>
+          <legend>Passphrase (optional)</legend>
+          <br />
+          <Input
+            type="password" name="password" label="Passphrase"
+            value="" autoComplete="off"
+            placeholder="Password"
+            componentRef={component => {
+              this.passwordRef = component
+            }}
+          />
+
+          <Input
+            type="password" name="confirm" label="Confirm"
+            value="" autoComplete="off"
+            placeholder="Confirm"
+            validations="equalsField:password"
+            validationErrors={{
+              equalsField: 'Passwords must match.'
+            }}
+          />
+
+          <ul>
+            <li>Every passphrase creates a different wallet</li>
+            <li>Every passphrase is valid (including no passphrase)</li>
+            <li>This passphrase acts like an additional word added the Mnemonic Key</li>
+            <li>Consider a passphrase you can share with those you trust</li>
+            <li>No passphrase, no private key, no funds</li>
+            <li>Password is case sensitive</li>
+          </ul>
+        </fieldset>
+        <br />
+
+        <fieldset>
+          <legend> Hint (recommended)</legend>
+          This will appear on your backup.  The passphrase is very important,
+          this hint is recommended.
+          <br />
+          <br />
+
+          <Input name="hint" label="Passphrase Hint" />
+        </fieldset>
+        <br />
+
+        <input
+          className="btn btn-primary"
+          type="submit" defaultValue="Submit"
+        />
+      </Form>
+    </fieldset>
+  )
+}
+
 // <li>Secure this information as if it were worth your weight in gold</li>
+// <li>Write down your Passphrase Account ID: <u>{accountId}</u></li>
+// <li>Write down your Passphrase Hint: <u>{hint}</u></li>
+// <div style={{float: 'right'}}>
+//   <AccountIcon accountId={accountId} />
+// </div>
+
+const PasswordAccountLogin = ({accountId, hint, onSubmit}) => (
+  <fieldset>
+    <legend>Passphrase Account</legend>
+    <div style={{float: 'right'}}>
+      <AccountIcon accountId={accountId} />
+    </div>
+
+    <p>
+      The Passphrase Account ID is optional but may assist with form
+      auto-completion and will check your passphrase in the next step.
+    </p>
+
+    <Form onValidSubmit={onSubmit}>
+      <Input type="text" name="accountId" autoComplete="yes"
+        placeholder="Passphrase Account ID (optional)" />
+
+      <Input type="password" name="Mnemonic Phrase" required autoComplete="yes"
+        placeholder="Mnemonic Phrase (24 words)" />
+    </Form>
+
+    <ul>
+      {hint && <li>Passphrase Hint: <u>{hint}</u></li>}
+      <li>Passphrase Account ID: <u>{accountId}</u></li>
+    </ul>
+  </fieldset>
+)
 
 const AccountIcon = ({accountId}) => {
   let hash = accountId.toString(16)
@@ -365,7 +438,7 @@ const PrivateKeyCard = ({wif, pubkey, hint, accountId}) => (
         </fieldset>
         <br/>
         <ul>
-          <li>Password Hint: <u>{hint}</u></li>
+          <li>Passphrase Hint: <u>{hint}</u></li>
           <li>Account ID: <u>{accountId}</u></li>
           <li>Your funds will be stolen if you use your private key on a malicious/phishing site.</li>
           <li><small>Corresponding Public Key: {pubkey}</small></li>
@@ -392,7 +465,7 @@ const PublicKeyCard = ({pubkey, hint}) => (
           <legend>EOS Public Key</legend>
           <SpanSelect className="CopyText">{pubkey}</SpanSelect>
           <ul>
-            <li>Password Hint: "<u>{hint}</u>"</li>
+            <li>Passphrase Hint: "<u>{hint}</u>"</li>
             <li>Give out this public key to receive payments.</li>
             <li>You may use this <b>Public Key</b> as your <b>EOS claim key</b>.</li>
           </ul>

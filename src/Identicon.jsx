@@ -26,10 +26,11 @@ export default class Identicon extends Component {
   }
   
   shouldComponentUpdate(nextProps) {
-    return
+    return (
       nextProps.size.height !== this.props.size.height ||
       nextProps.size.width !== this.props.size.width ||
-      nextProps.hash !== this.props.hash;
+      nextProps.hash !== this.props.hash
+    )
   }
 
   componentDidUpdate() {
