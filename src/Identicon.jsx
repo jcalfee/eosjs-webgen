@@ -9,7 +9,7 @@ export default class Identicon extends Component {
 
   static propTypes = {
     size: PropTypes.object.isRequired,
-    hash: PropTypes.oneOf([PropTypes.string, PropTypes.number])
+    hash: PropTypes.oneOf(PropTypes.string, PropTypes.number)
   }
 
   static defaultProps = {

@@ -9,6 +9,8 @@ import { Form, Input, Textarea } from 'formsy-react-components'
 
 import QrReaderDialog from './QrReaderDialog'
 
+import {EntropyContainer, EntropyCount} from './Entropy'
+
 import createHistory from 'history/createBrowserHistory'
 
 import QRCode from 'react-qr';
@@ -25,7 +27,7 @@ let cpuEntropyBits
 
 export default class App extends Component {
 
-  static initialState = {entropyCount: 0}
+  static initialState = {}
 
   constructor() {
     super()
@@ -50,28 +52,11 @@ export default class App extends Component {
     })
   }
 
-  onEntropyEvent = e => {
-    if(e.type === 'mousemove') {
-      key_utils.addEntropy(e.pageX, e.pageY, e.screenX, e.screenY)
-    } else {
-      console.log('onEntropyEvent Unknown', e.type, e)
-    }
-    this.setState({entropyCount: this.state.entropyCount + 1})
-  }
-
-  newWallet = () => {
-    const waitForRenderMs = 100
-    this.setState(
-      {generating: true},
-      () => {setTimeout(() => {go()}, waitForRenderMs)}
-    )
-    const go = () => {
-      const mnemonic = randomMnemonic(24, cpuEntropyBits)
-      this.setState(
-        {generating: false, mnemonic, isBip39: true},
-        () => {history.push()}
-      )
-    }
+  newWallet = (done) => {
+    const mnemonic = randomMnemonic(24, cpuEntropyBits)
+    this.setState({ mnemonic, isBip39: true }, () => {
+      history.push()
+    })
   }
 
   openWallet = (mnemonic, isBip39) => {
@@ -93,61 +78,41 @@ export default class App extends Component {
   }
 
   render() {
-    const {generating, entropyCount} = this.state
     const {mnemonic, isBip39} = this.state
     const {wif, pubkey, hint, accountId} = this.state
 
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h3>Wallet Key Tool</h3>
-        </div>
-        <br />
-        
-        {!mnemonic && !generating &&
-        <div className="App-intro" onMouseMove={this.onEntropyEvent}>
-          <div className="container">
-            <div className="row">
-              <div className="col border border-info rounded">
-                <fieldset>
-                  <legend>New Wallet</legend>
-                  <div>
-                    <button onClick={this.newWallet}>
-                      Go <small>(entropy {entropyCount}&hellip;)</small>
-                    </button>
-                    <br />
-                    <br />
-                  </div>
-                </fieldset>
-              </div>
-            </div>
-            <br />
-            <div className="row">
-              <div className="col border border-info rounded">
-                <OpenWalletForm onSubmit={this.openWallet} />
-              </div>
-            </div>
-            {/*<div className="row">
-              <div className="col border border-info rounded">
-                <PasswordAccountLogin onSubmit={this.loginWallet} />
-              </div>
-            </div>*/}
+      <EntropyContainer>
+        <div className="App">
+          <div className="App-header">
+            <img src={logo} className="App-logo" alt="logo" />
+            <h3>Wallet Key Tool</h3>
           </div>
-        </div>}
-
-        {generating && <div className="App-intro">
-          <h3>Creating Mnemonic Phrase</h3>
-          <br/>
-          Gathering entropy&hellip;
-        </div>}
-
-        {mnemonic && <div className="App-body">
-          <MnemonicKeyCard {...{mnemonic, isBip39}}/>
           <br />
-          <br />
-        </div>}
-      </div>
+          
+          {!mnemonic &&
+          <div className="App-intro">
+            <div className="container">
+              <div className="row">
+                <div className="col border border-info rounded">
+                  <OpenWalletForm onSubmit={this.openWallet} newWallet={this.newWallet} />
+                </div>
+              </div>
+              {/*<div className="row">
+                <div className="col border border-info rounded">
+                  <PasswordAccountLogin onSubmit={this.loginWallet} />
+                </div>
+              </div>*/}
+            </div>
+          </div>}
+
+          {mnemonic && <div className="App-body">
+            <MnemonicKeyCard {...{mnemonic, isBip39}}/>
+            <br />
+            <br />
+          </div>}
+        </div>
+      </EntropyContainer>
     )
   }
 }
@@ -157,6 +122,10 @@ export default class App extends Component {
 
 require('./OpenWallet.css')
 class OpenWalletForm extends Component {
+  static propTypes = {
+    onSubmit: PropTypes.func.isRequired,
+    newWallet: PropTypes.func.isRequired,
+  }
 
   submit = ({mnemonic}) => {
     const {onSubmit} = this.props
@@ -213,43 +182,95 @@ class OpenWalletForm extends Component {
   render() {
     const camera = <span>&#x1f4f7;</span>  
     const eye = <span>&#x1f441;</span>
+    const {newWallet} = this.props
 
     return (
-      <Form onValidSubmit={this.submit} >
-        <fieldset>
-          <legend>Open Wallet</legend>
-          <div className="row">
-            <div className="col">
-              <Input required type="input" id="openWalletMnemonic"
-                name="mnemonic" label="Mnemonic Phrase"
-                help="Private Mnemonic Phrase (Bip39,&nbsp;24&nbsp;words)"
-                addonAfter={
-                  <span id="OpenWallet_eye" onClick={this.eye}>{eye}</span>
-                }
-              />
+      <div>
+        <Form onValidSubmit={this.submit} >
+          <fieldset>
+            <legend>Open Wallet</legend>
+            <div className="row">
+              <div className="col">
+                <Input required type="password" id="openWalletMnemonic"
+                  name="mnemonic" label="Mnemonic Phrase"
+                  help="Private Mnemonic Phrase (Bip39,&nbsp;24&nbsp;words)"
+                  addonAfter={
+                    <span id="OpenWallet_eye" title="Show / Hide"
+                      className="DisabledEye"
+                      onClick={this.eye}>{eye}</span>
+                  }
+                />
+              </div>
+              <div className="col-2">
+                &nbsp;
+              </div>
             </div>
-            <div className="col-2">
-              &nbsp;
-            </div>
-          </div>
-          <br />
+            <br />
 
-          <button>Open</button>
+            <button>Open</button>
 
-          <QrReaderDialog scan={this.scan}
-            title="Private Mnemonic Phrase Reader"
-            message="Hold up your private mnemonic phrase QR code"
-            component={click =>
-              <button onClick={click}>QR ({camera})</button>
-            }/>
-          <br/>
-          <br/>
+            <QrReaderDialog scan={this.scan}
+              title="Private Mnemonic Phrase Reader"
+              message="Hold up your private mnemonic phrase QR code"
+              component={click =>
+                <button onClick={click}>QR ({camera})</button>
+              }/>
 
-        </fieldset>
-      </Form>
+            <NewWallet newWallet={newWallet} />
+
+            <br/>
+            <br/>
+
+          </fieldset>
+        </Form>
+      </div>
     )
   }
 }
+
+class NewWallet extends PureComponent {
+  static propTypes = {
+    newWallet: PropTypes.func.isRequired
+  }
+
+  constructor() {
+    super()
+    this.state = {}
+  }
+
+  newWallet = () => {
+    const waitForRenderMs = 100
+    this.setState(
+      {generating: true},
+      () => {setTimeout(() => {go()}, waitForRenderMs)}
+    )
+    const go = () => {
+      this.props.newWallet(() => {
+        this.setState({generating: false})
+      })
+    }
+  }
+
+  render() {
+    const {generating} = this.state
+    if(generating) {
+      return (
+        <span>Creating&hellip;</span>
+      )
+    }
+
+    return (
+      <button onClick={this.newWallet}>
+        New Wallet <small>(entropy {<EntropyCount/>}&hellip;)</small>
+      </button>
+    )
+  }
+}
+// {generating && <div className="App-intro">
+//   <h3>Creating Mnemonic Phrase</h3>
+//   <br/>
+//   Gathering entropy&hellip;
+// </div>}
 
 const MnemonicKeyCard = ({mnemonic, isBip39}) => (
   <fieldset>
@@ -280,10 +301,11 @@ const MnemonicKeyCard = ({mnemonic, isBip39}) => (
           <SpanSelect className="CopyText">{mnemonic}</SpanSelect>
           <br />&nbsp;
           <ul>
+            <li>You are the only person with this phrase, no phrase no funds</li>
             <li>Carefully write down all 24 words in order</li>
+            <li>Securely print or photograph this page</li>
             <li>If saving on a USB or Removable drive, safely eject and re-open</li>
             <li>Your funds could be stolen if you use your mnemonic key on a malicious/phishing site</li>
-            <li>You are the only person with this phrase, no phrase no funds</li>
           </ul>
         </fieldset>
       </div>
