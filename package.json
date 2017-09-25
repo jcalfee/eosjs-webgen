@@ -17,6 +17,7 @@
     "jdenticon": "^1.7.2",
     "prop-types": "^15.5.10",
     "react": "^15.6.1",
+    "react-autofill": "^1.1.4",
     "react-confirm-alert": "^1.0.7",
     "react-dom": "^15.6.1",
     "react-forms": "^2.0.0-beta35",

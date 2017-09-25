@@ -3,9 +3,11 @@ import './bootstrap.css';
 import logo from './LogoData';
 
 import React, { Component, PureComponent } from 'react';
+import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 
 import { Form, Input, Textarea } from 'formsy-react-components'
+import autofill from 'react-autofill'
 
 import QrReaderDialog from './QrReaderDialog'
 
@@ -19,6 +21,7 @@ import Identicon from './Identicon'
 
 import {randomMnemonic, mnemonicKeyPair, mnemonicIv} from './mnemonic'
 import {suggest, validSeed, normalize} from 'bip39-checker'
+
 import ReactConfirmAlert, {confirmAlert} from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
@@ -52,8 +55,7 @@ export default class App extends Component {
     })
   }
 
-  newWallet = (done) => {
-    const mnemonic = randomMnemonic(24, cpuEntropyBits)
+  newWallet = (mnemonic) => {
     this.setState({ mnemonic, isBip39: true }, () => {
       history.push()
     })
@@ -121,11 +123,14 @@ export default class App extends Component {
 // <PublicKeyCard {...{pubkey, hint}} />
 
 require('./OpenWallet.css')
+OpenWalletForm = autofill(OpenWalletForm)
 class OpenWalletForm extends Component {
   static propTypes = {
     onSubmit: PropTypes.func.isRequired,
     newWallet: PropTypes.func.isRequired,
   }
+
+  state = {}
 
   submit = ({mnemonic}) => {
     const {onSubmit} = this.props
@@ -170,6 +175,7 @@ class OpenWalletForm extends Component {
   */
   eye = () => {
     const mnEl = document.getElementById("openWalletMnemonic")
+    // const mnEl = ReactDOM.findDOMNode(this.mnemonic)
     const hide = mnEl.type !== 'password' // Toggle
     mnEl.setAttribute('type', hide ? 'password' : 'text')
 
@@ -179,21 +185,41 @@ class OpenWalletForm extends Component {
 
   scan = mnemonic => this.submit({mnemonic})
 
+  mnemonicChange = (name, value) => {
+    this.setState({hasMnemonic: value !== ''})
+  }
+
+  reset = (e) => {
+    this.form.formsyForm.reset()
+    this.setState({hasMnemonic: false})
+  }
+
+  newWallet = () => {
+    this.reset()
+    const mnemonic = randomMnemonic(12, cpuEntropyBits)
+    // ReactDOM.findDOMNode(this.mnemonic)
+    this.props.newWallet(mnemonic)
+  }
+
+  formRef = r => this.form = r
+  mnemonicRef = r => this.mnemonic = r
+
   render() {
     const camera = <span>&#x1f4f7;</span>  
     const eye = <span>&#x1f441;</span>
-    const {newWallet} = this.props
+    const {hasMnemonic} = this.state
 
     return (
       <div>
-        <Form onValidSubmit={this.submit} >
+        <Form onValidSubmit={this.submit} ref={this.formRef}>
           <fieldset>
             <legend>Open Wallet</legend>
             <div className="row">
               <div className="col">
-                <Input required type="password" id="openWalletMnemonic"
+                <Input required type="password" ref={this.mnemonicRef} id="openWalletMnemonic"
                   name="mnemonic" label="Mnemonic Phrase"
-                  help="Private Mnemonic Phrase (Bip39,&nbsp;24&nbsp;words)"
+                  help="Private Mnemonic Phrase (Bip39,&nbsp;12&nbsp;words)"
+                  onChange={this.mnemonicChange}
                   addonAfter={
                     <span id="OpenWallet_eye" title="Show / Hide"
                       className="DisabledEye"
@@ -216,7 +242,8 @@ class OpenWalletForm extends Component {
                 <button onClick={click}>QR ({camera})</button>
               }/>
 
-            <NewWallet newWallet={newWallet} />
+            {!hasMnemonic && <NewWallet newWallet={this.newWallet} />}
+            {hasMnemonic && <button type="reset" onClick={this.reset}>Reset</button>}
 
             <br/>
             <br/>
@@ -261,7 +288,7 @@ class NewWallet extends PureComponent {
 
     return (
       <button onClick={this.newWallet}>
-        New Wallet <small>(entropy {<EntropyCount/>}&hellip;)</small>
+        New Phrase <small>(entropy {<EntropyCount/>}&hellip;)</small>
       </button>
     )
   }
@@ -302,7 +329,7 @@ const MnemonicKeyCard = ({mnemonic, isBip39}) => (
           <br />&nbsp;
           <ul>
             <li>You are the only person with this phrase, no phrase no funds</li>
-            <li>Carefully write down all 24 words in order</li>
+            <li>Carefully write down all 12 words in order</li>
             <li>Securely print or photograph this page</li>
             <li>If saving on a USB or Removable drive, safely eject and re-open</li>
             <li>Your funds could be stolen if you use your mnemonic key on a malicious/phishing site</li>
@@ -316,7 +343,6 @@ const MnemonicKeyCard = ({mnemonic, isBip39}) => (
 class EnterPasswordForm extends React.Component {
   componentDidMount() {
     this.passwordRef.element.focus()
-    // this.passwordRef.element.getDOMNode().value = 'hi'
   }
 
   submit = ({password, hint = 'empty'}) =>
@@ -407,7 +433,7 @@ const PasswordAccountLogin = ({accountId, hint, onSubmit}) => (
         placeholder="Passphrase Account ID (optional)" />
 
       <Input type="password" name="Mnemonic Phrase" required autoComplete="yes"
-        placeholder="Mnemonic Phrase (24 words)" />
+        placeholder="Mnemonic Phrase (12 words)" />
     </Form>
 
     <ul>

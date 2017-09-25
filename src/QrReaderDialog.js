@@ -20,7 +20,7 @@ export default class QrReaderDialog extends Component {
     component: PropTypes.func.isRequired,
 
     /** @example {width: '21em', height: '15em'} */
-    size: PropTypes.obj,
+    size: PropTypes.object,
 
     title: PropTypes.string,
     message: PropTypes.string,
