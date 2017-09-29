@@ -220,6 +220,7 @@ class OpenWalletForm extends Component {
                   name="mnemonic" label="Mnemonic Phrase"
                   help="Private Mnemonic Phrase (Bip39,&nbsp;12&nbsp;words)"
                   onChange={this.mnemonicChange}
+                  elementWrapperClassName="mnemonic-component"
                   addonAfter={
                     <span id="OpenWallet_eye" title="Show / Hide"
                       className="DisabledEye"
