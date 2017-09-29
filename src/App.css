@@ -46,3 +46,8 @@
   padding-right: .5em;
   font-family: monospace;
 }
+
+button, input[type="button"], input[type="submit"] { 
+  margin-left: 3px !important;
+  margin-right: 3px !important;
+}

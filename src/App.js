@@ -234,17 +234,17 @@ class OpenWalletForm extends Component {
             </div>
             <br />
 
-            <button>Open</button>
+            <button className="btn btn-primary">Open</button>
 
             <QrReaderDialog scan={this.scan}
               title="Private Mnemonic Phrase Reader"
               message="Hold up your private mnemonic phrase QR code"
               component={click =>
-                <button onClick={click}>QR ({camera})</button>
+                <button className="btn btn-primary" onClick={click}>QR ({camera})</button>
               }/>
 
             {!hasMnemonic && <NewWallet newWallet={this.newWallet} />}
-            {hasMnemonic && <button type="reset" onClick={this.reset}>Reset</button>}
+            {hasMnemonic && <button className="btn btn-primary" type="reset" onClick={this.reset}>Reset</button>}
 
             <br/>
             <br/>
@@ -288,7 +288,7 @@ class NewWallet extends PureComponent {
     }
 
     return (
-      <button onClick={this.newWallet}>
+      <button className="btn btn-primary" onClick={this.newWallet}>
         New Phrase <small>(entropy {<EntropyCount/>}&hellip;)</small>
       </button>
     )

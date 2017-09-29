@@ -27,7 +27,7 @@ export default class QrReaderDialog extends Component {
   }
 
   static defaultProps = {
-    size: {width: '21em', height: '15em'},
+    size: {width: '18em', height: '15em'},
     title: 'QR Code Reader',
     message: 'Hold up your QR code'
   }
@@ -37,11 +37,13 @@ export default class QrReaderDialog extends Component {
     this.state = {}
   }
 
-  qrReaderClick = () => {
+  qrReaderClick = (e) => {
+    if(e) e.preventDefault();
     this.setState({qrReader: true})
   }
 
-  qrReaderCancel = () => {
+  qrReaderCancel = (e) => {
+    if(e) e.preventDefault();
     this.setState({qrReader: false})
   }
 
