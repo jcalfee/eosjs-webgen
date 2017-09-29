@@ -125,8 +125,10 @@ export default class App extends Component {
                 onSubmit={this.onSubmitPassword}/>
             </div>}
 
-            {wif && <div className="App-body">
+            {wif && <div>
               <PrivateKeyCard {...{wif, pubkey, hint, accountId}}/>
+              <br />
+              <br />
               <PublicKeyCard {...{pubkey, hint}} />
             </div>}
           </div>
@@ -335,19 +337,18 @@ const MnemonicKeyCard = ({mnemonic, mnemonicId, isBip39}) => (
         </fieldset>
       </div>
       <div className="col-8">
+        <div style={{float: 'right'}}>
+          <AccountIcon label="Mn " accountId={mnemonicId} />
+        </div>
         <fieldset>
           <legend>Private Mnemonic Phrase <small>({isBip39 ? 'Bip39' : 'Unchecked'})</small></legend>
-
-          <div style={{float: 'right'}}>
-            <AccountIcon label="Mn " accountId={mnemonicId} />
-          </div>
           <SpanSelect className="CopyText">{mnemonic}</SpanSelect>
           <br />&nbsp;
           <ul>
             <li>You are the only person with this phrase, no phrase no funds</li>
-            <li>Carefully write down all 12 words in order</li>
+            <li>Carefully write down all words in order</li>
             <li>Securely print or photograph this page</li>
-            <li>If saving on a USB or Removable drive, safely eject and re-open</li>
+            <li>If saving on a USB or Removable drive, safely eject</li>
             <li>Your funds could be stolen if you use your mnemonic key on a malicious/phishing site</li>
           </ul>
         </fieldset>
@@ -484,7 +485,7 @@ const AccountIcon = ({label = "Acct ", accountId}) => {
 }
 
 const PrivateKeyCard = ({wif, pubkey, hint, accountId}) => (
-  <fieldset>
+  <div>
     <div className="row">
       <div className="col-4">
         <fieldset>
@@ -497,11 +498,11 @@ const PrivateKeyCard = ({wif, pubkey, hint, accountId}) => (
         </fieldset>
       </div>
       <div className="col">
+        <div style={{float: 'right'}}>
+          <AccountIcon accountId={accountId} />
+        </div>
         <fieldset>
           <legend>Private Key <small>(Wallet Import Format &mdash; WIF)</small></legend>
-          <div style={{float: 'right'}}>
-            <AccountIcon accountId={accountId} />
-          </div>
           <SpanSelect className="CopyText">{wif}</SpanSelect>
         </fieldset>
         <br/>
@@ -513,12 +514,12 @@ const PrivateKeyCard = ({wif, pubkey, hint, accountId}) => (
         </ul>
       </div>
     </div>
-  </fieldset>
+  </div>
 )
 // <li>The same private key appers in two formats above.</li>
 
 const PublicKeyCard = ({pubkey, hint}) => (
-  <fieldset>
+  <div>
     <div className="row">
       <div className="col-4">
         <fieldset>
@@ -540,7 +541,7 @@ const PublicKeyCard = ({pubkey, hint}) => (
         </fieldset>
       </div>
     </div>
-  </fieldset>
+  </div>
 )
 
 const selectAll = e => {
