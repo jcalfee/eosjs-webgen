@@ -13,7 +13,7 @@ export default class Identicon extends Component {
   }
 
   static defaultProps = {
-    size: {height: 130, width: 130}
+    size: {height: 80, width: 80}
   }
 
   constructor(props) {

@@ -50,7 +50,7 @@ export function mnemonicKeyPair(mnemonic, password) {
   const privateKey = PrivateKey.fromBuffer(IL)
   const wif = privateKey.toString()
   const pubkey = privateKey.toPublic().toString()
-  const iv = IR.readUInt16LE(0)
+  const iv = IR
 
   return {wif, pubkey, iv}
 }
