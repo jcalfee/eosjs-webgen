@@ -6,6 +6,7 @@ import React, { Component, PureComponent } from 'react';
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 
+import Formsy from 'formsy-react'
 import { Form, Input, Textarea } from 'formsy-react-components'
 import autofill from 'react-autofill'
 
@@ -47,7 +48,14 @@ export default class App extends Component {
     history.listen((location, action) => {
       // console.log(action, location.pathname, location.state)
       if(action === 'POP') {
-        if(this.state.mnemonic) {
+        if(this.state.accountId) {
+          this.setState({
+            wif: null,
+            pubkey: null,
+            accountId: null,
+            hint: null
+          })
+        } else if(this.state.mnemonic) {
           this.state = App.initialState
           this.setState()
         }
@@ -80,7 +88,9 @@ export default class App extends Component {
     const {mnemonic} = this.state
     const {wif, pubkey, iv} = mnemonicKeyPair(mnemonic, password)
     const accountId = iv.readUInt16LE(0)
-    this.setState({wif, pubkey, accountId, hint})
+    this.setState({wif, pubkey, accountId, hint}, () => {
+      history.push()
+    })
   }
 
   render() {
@@ -233,7 +243,8 @@ class OpenWalletForm extends Component {
             <legend>Open Wallet</legend>
             <div className="row">
               <div className="col">
-                <Input required type="password" ref={this.mnemonicRef} id="openWalletMnemonic"
+                <Input required type="password" ref={this.mnemonicRef}
+                  id="openWalletMnemonic"
                   name="mnemonic" id="mnemonic" label="Mnemonic Phrase"
                   help="Private Mnemonic Phrase (Bip39,&nbsp;12&nbsp;words)"
                   value={newMnemonic}
@@ -362,8 +373,12 @@ class EnterPasswordForm extends React.Component {
     this.passwordRef.element.focus()
   }
 
-  submit = ({password, hint = 'empty'}) =>
-    this.props.onSubmit({password, hint})
+  submit = ({password, hint = 'empty'}) => {
+    // https://github.com/christianalfoni/formsy-react/issues/484
+    const passValue = this.passwordRef.element.value
+
+    this.props.onSubmit({password: passValue, hint})
+  }
 
   render() {
     const {mnemonicId} = this.props
@@ -386,22 +401,17 @@ class EnterPasswordForm extends React.Component {
             <input type="password" style={{display:'none'}}/>
 
             <Input type="password" name="password" id="password"
-              label="Passphrase" value="" autoComplete="off"
-              placeholder="Password" value=""
-              componentRef={component => {
-                this.passwordRef = component
-              }}
+              label="Passphrase" autoComplete="off" placeholder="Password"
+              componentRef={component => {this.passwordRef = component}}
             />
 
+            {/* https://github.com/christianalfoni/formsy-react/issues/484
             <Input
               type="password" name="confirm" label="Confirm"
-              value="" autoComplete="off"
-              placeholder="Confirm"
+              autoComplete="off" placeholder="Confirm"
               validations="equalsField:password"
-              validationErrors={{
-                equalsField: 'Passwords must match.'
-              }}
-            />
+              validationErrors={{equalsField: 'Passwords must match.'}}
+            />*/}
 
             <ul>
               <li>Every passphrase creates a different wallet</li>
