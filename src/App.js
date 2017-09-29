@@ -61,8 +61,9 @@ export default class App extends Component {
     })
   }
 
-  openWallet = (mnemonic, isBip39) => {
-    this.setState({ mnemonic, isBip39 }, () => {
+  openWallet = (mnemonic, isBip39, newMnemonic) => {
+    this.setState({ mnemonic, isBip39, newMnemonic }, () => {
+      console.log('newMnemonic', newMnemonic)
       history.push()
     })
   }
@@ -134,11 +135,12 @@ class OpenWalletForm extends Component {
 
   submit = ({mnemonic}) => {
     const {onSubmit} = this.props
+    const {newMnemonic} = this.state
 
     mnemonic = normalize(mnemonic)
     const v = validSeed(mnemonic)
     if(v.valid) {
-      onSubmit(mnemonic, true)
+      onSubmit(mnemonic, true, newMnemonic)
       return
     }
 
@@ -165,7 +167,7 @@ class OpenWalletForm extends Component {
         {suggestions ? <div>Suggestions: {suggestions}<br/></div> : ''}
       </div>),
       onConfirm: () => {
-        onSubmit(mnemonic, false)
+        onSubmit(mnemonic, false, newMnemonic)
       }
     })
   }
@@ -186,19 +188,18 @@ class OpenWalletForm extends Component {
   scan = mnemonic => this.submit({mnemonic})
 
   mnemonicChange = (name, value) => {
-    this.setState({hasMnemonic: value !== ''})
+    this.setState({hasMnemonicChange: value !== '', newMnemonic: value})
   }
 
   reset = (e) => {
     this.form.formsyForm.reset()
-    this.setState({hasMnemonic: false})
+    this.setState({hasMnemonicChange: false, newMnemonic: null})
   }
 
   newWallet = () => {
     this.reset()
-    const mnemonic = randomMnemonic(12, cpuEntropyBits)
-    // ReactDOM.findDOMNode(this.mnemonic)
-    this.props.newWallet(mnemonic)
+    const newMnemonic = randomMnemonic(12, cpuEntropyBits)
+    this.setState({newMnemonic})
   }
 
   formRef = r => this.form = r
@@ -207,8 +208,9 @@ class OpenWalletForm extends Component {
   render() {
     const camera = <span>&#x1f4f7;</span>  
     const eye = <span>&#x1f441;</span>
-    const {hasMnemonic} = this.state
+    const {hasMnemonicChange, newMnemonic} = this.state
 
+    const hasMnemonic = hasMnemonicChange || newMnemonic
     return (
       <div>
         <Form onValidSubmit={this.submit} ref={this.formRef}>
@@ -219,6 +221,7 @@ class OpenWalletForm extends Component {
                 <Input required type="password" ref={this.mnemonicRef} id="openWalletMnemonic"
                   name="mnemonic" label="Mnemonic Phrase"
                   help="Private Mnemonic Phrase (Bip39,&nbsp;12&nbsp;words)"
+                  value={newMnemonic}
                   onChange={this.mnemonicChange}
                   elementWrapperClassName="mnemonic-component"
                   addonAfter={
@@ -228,7 +231,7 @@ class OpenWalletForm extends Component {
                   }
                 />
               </div>
-              <div className="col-2">
+              <div className="col-1">
                 &nbsp;
               </div>
             </div>
@@ -245,7 +248,6 @@ class OpenWalletForm extends Component {
 
             {!hasMnemonic && <NewWallet newWallet={this.newWallet} />}
             {hasMnemonic && <button className="btn btn-primary" type="reset" onClick={this.reset}>Reset</button>}
-
             <br/>
             <br/>
 
@@ -273,9 +275,8 @@ class NewWallet extends PureComponent {
       () => {setTimeout(() => {go()}, waitForRenderMs)}
     )
     const go = () => {
-      this.props.newWallet(() => {
-        this.setState({generating: false})
-      })
+      this.props.newWallet()
+      this.setState({generating: false})
     }
   }
 
@@ -288,9 +289,10 @@ class NewWallet extends PureComponent {
     }
 
     return (
-      <button className="btn btn-primary" onClick={this.newWallet}>
+      // div instead of a button, prevent the password manager from saving an old phrase (being over-written)
+      <div className="btn btn-primary" onClick={this.newWallet}>
         New Phrase <small>(entropy {<EntropyCount/>}&hellip;)</small>
-      </button>
+      </div>
     )
   }
 }
