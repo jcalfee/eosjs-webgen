@@ -6,8 +6,8 @@ import React, { Component, PureComponent } from 'react';
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 
-import Formsy from 'formsy-react'
-import { Form, Input, Textarea } from 'formsy-react-components'
+// import Formsy from 'formsy-react'
+import { Form, Input } from 'formsy-react-components'
 import autofill from 'react-autofill'
 
 import QrReaderDialog from './QrReaderDialog'
