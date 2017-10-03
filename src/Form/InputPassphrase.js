@@ -9,7 +9,8 @@ export default class EnterPasswordForm extends React.Component {
   submit = ({password, hint = 'empty'}) => {
     // https://github.com/christianalfoni/formsy-react/issues/484
     const passValue = this.passwordRef.element.value
-    this.props.onSubmit({password: passValue, hint})
+    const hintValue = this.hintRef.element.value
+    this.props.onSubmit({password: passValue, hint: hintValue})
   }
 
   render() {
@@ -59,7 +60,9 @@ export default class EnterPasswordForm extends React.Component {
           <br />
           <br />
 
-          <Input name="hint" label="Passphrase Hint" placeholder="Hint" />
+          <Input name="hint" label="Passphrase Hint" placeholder="Hint"
+            componentRef={component => {this.hintRef = component}}
+          />
           <br />
 
           <input className="btn btn-primary" type="submit" defaultValue="Submit" />
