@@ -156,7 +156,7 @@ class OpenWalletForm extends Component {
     newWallet: PropTypes.func.isRequired,
   }
 
-  state = {}
+  state = {showMnemonic: false}
 
   submit = ({mnemonic}) => {
     const {onSubmit} = this.props
@@ -201,13 +201,7 @@ class OpenWalletForm extends Component {
     Convert the mnemonic input to / from a password field.
   */
   eye = () => {
-    const mnEl = document.getElementById("openWalletMnemonic")
-    // const mnEl = ReactDOM.findDOMNode(this.mnemonic)
-    const hide = mnEl.type !== 'password' // Toggle
-    mnEl.setAttribute('type', hide ? 'password' : 'text')
-
-    const eyeEl = document.getElementById("OpenWallet_eye")
-    eyeEl.setAttribute('class', hide ? 'DisabledEye' : '')
+    this.setState({showMnemonic: !this.state.showMnemonic})
   }
 
   scan = mnemonic => this.submit({mnemonic})
@@ -228,12 +222,14 @@ class OpenWalletForm extends Component {
   }
 
   formRef = r => this.form = r
-  mnemonicRef = r => this.mnemonic = r
 
   render() {
     const camera = <span>&#x1f4f7;</span>  
     const eye = <span>&#x1f441;</span>
-    const {hasMnemonicChange, newMnemonic} = this.state
+    const {hasMnemonicChange, newMnemonic, showMnemonic} = this.state
+
+    const disableEyeClass = showMnemonic ?  '' : 'DisabledEye'
+    const mnemonicInputType = showMnemonic ? 'text' : 'password'
 
     const hasMnemonic = hasMnemonicChange || newMnemonic
     return (
@@ -243,16 +239,15 @@ class OpenWalletForm extends Component {
             <legend>Open Wallet</legend>
             <div className="row">
               <div className="col">
-                <Input required type="password" ref={this.mnemonicRef}
-                  id="openWalletMnemonic"
-                  name="mnemonic" id="mnemonic" label="Mnemonic Phrase"
+                <Input required type={mnemonicInputType}
+                  name="mnemonic" label="Mnemonic Phrase"
                   help="Private Mnemonic Phrase (Bip39,&nbsp;12&nbsp;words)"
                   value={newMnemonic}
                   onChange={this.mnemonicChange}
                   elementWrapperClassName="mnemonic-component"
                   addonAfter={
                     <span id="OpenWallet_eye" title="Show / Hide"
-                      className="DisabledEye"
+                      className={disableEyeClass}
                       onClick={this.eye}>{eye}</span>
                   }
                 />
