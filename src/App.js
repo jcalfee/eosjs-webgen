@@ -129,6 +129,12 @@ export default class App extends Component {
             </div>}
 
             {wif && <div>
+              <h1>Warning</h1>
+              <b>The Mnemonic to Private Key calculation will change.</b>
+              <br />
+              <br />
+              <br />
+
               <PrivateKeyCard {...{wif, pubkey, hint, accountId}}/>
               <br />
               <br />
