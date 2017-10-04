@@ -42,8 +42,11 @@ export function randomMnemonic(wordCount = 24, cpuEntropyBits) {
   }
 }
 
-export function mnemonicKeyPair(mnemonic, password) {
-  const I = bip39.mnemonicToSeed(mnemonic, password)
+// username + role + password
+// network / role / username
+
+export function mnemonicKeyPair(mnemonic, passphrase) {
+  const I = bip39.mnemonicToSeed(mnemonic, passphrase)
   const IL = I.slice(0, 32)
   const IR = I.slice(32)
 
@@ -58,8 +61,8 @@ export function mnemonicKeyPair(mnemonic, password) {
 /** @return {Buffer} Initialization vector. This is generally not
   considered private.
 */
-export function mnemonicIv(mnemonic, password) {
-  const I = bip39.mnemonicToSeed(mnemonic, password)
+export function mnemonicIv(mnemonic, passphrase) {
+  const I = bip39.mnemonicToSeed(mnemonic, passphrase)
   const IR = I.slice(32)
   return IR
 }
