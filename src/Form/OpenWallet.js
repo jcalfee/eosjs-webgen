@@ -111,7 +111,7 @@ class OpenWallet extends PureComponent {
               <div className="col">
                 <Input required type={mnemonicInputType}
                   name="mnemonic" label="Mnemonic Phrase"
-                  help="Private Mnemonic Phrase (Bip39,&nbsp;12&nbsp;words)"
+                  help="Private Mnemonic Phrase (Bip39,&nbsp;12+&nbsp;words)"
                   value={newMnemonic}
                   onChange={this.mnemonicChange}
                   elementWrapperClassName="mnemonic-component"
