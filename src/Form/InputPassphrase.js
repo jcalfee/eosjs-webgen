@@ -7,10 +7,7 @@ export default class EnterPasswordForm extends React.Component {
   }
 
   submit = ({password, hint = 'empty'}) => {
-    // https://github.com/christianalfoni/formsy-react/issues/484
-    const passValue = this.passwordRef.element.value
-    const hintValue = this.hintRef.element.value
-    this.props.onSubmit({password: passValue, hint: hintValue})
+    this.props.onSubmit({password, hint})
   }
 
   render() {
@@ -31,18 +28,17 @@ export default class EnterPasswordForm extends React.Component {
           <input style={{display:'none'}}/>
           <input type="password" style={{display:'none'}}/>
 
-          <Input type="password" name="password" id="password"
+          <Input type="password" name="password" id="password" value=""
             label="Passphrase" autoComplete="off" placeholder="Password"
             componentRef={component => {this.passwordRef = component}}
           />
 
-          {/* https://github.com/christianalfoni/formsy-react/issues/484
           <Input
-            type="password" name="confirm" label="Confirm"
+            type="password" name="confirm" label="Confirm" value=""
             autoComplete="off" placeholder="Confirm"
             validations="equalsField:password"
             validationErrors={{equalsField: 'Passwords must match.'}}
-          />*/}
+          />
 
           <ul>
             <li>Every passphrase creates a different wallet</li>
