@@ -41,9 +41,10 @@ export default class EnterPasswordForm extends React.Component {
           />
 
           <ul>
+            <li>This passphrase can be short and easy</li>
             <li>Every passphrase creates a different wallet</li>
             <li>Every passphrase is valid (including no passphrase)</li>
-            <li>This passphrase acts like an additional word added the Mnemonic Key</li>
+            <li>This passphrase acts like an additional word added the Mnemonic Phrase</li>
             <li>Consider a passphrase you can share with those you trust</li>
             <li>No passphrase, no private key, no funds</li>
             <li>Password is case sensitive</li>

@@ -29,7 +29,7 @@ export default ({wif, pubkey, hint, accountId}) => (
         <ul>
           <li>Passphrase Hint: <u>{hint}</u></li>
           <li>Account ID: <u>{accountId}</u></li>
-          <li>Your funds will be stolen if you use your private key on a malicious/phishing site.</li>
+          <li>Your funds will be stolen if you use your private key on a malicious/phishing site</li>
           <li><small>Corresponding Public Key: {pubkey}</small></li>
         </ul>
       </div>
