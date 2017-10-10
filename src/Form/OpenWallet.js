@@ -26,13 +26,17 @@ class OpenWallet extends PureComponent {
   state = {showMnemonic: false}
 
   submit = ({mnemonic}) => {
-    const {onSubmit} = this.props
+    const {onSubmit, newWallet} = this.props
     const {newMnemonic} = this.state
 
     mnemonic = normalize(mnemonic)
     const v = validSeed(mnemonic)
     if(v.valid) {
-      onSubmit(mnemonic, true, newMnemonic)
+      if(newMnemonic) {
+        newWallet(mnemonic)
+      } else {
+        onSubmit(mnemonic, /*isBip39*/true)
+      }
       return
     }
 
@@ -60,7 +64,7 @@ class OpenWallet extends PureComponent {
         {suggestions ? <div>Suggestions: {suggestions}<br/></div> : ''}
       </div>),
       onConfirm: () => {
-        onSubmit(mnemonic, false, newMnemonic)
+        onSubmit(mnemonic, /*isBip39*/false)
       }
     })
   }
@@ -75,7 +79,7 @@ class OpenWallet extends PureComponent {
   scan = mnemonic => this.submit({mnemonic})
 
   mnemonicChange = (name, value) => {
-    this.setState({hasMnemonicChange: value !== '', newMnemonic: value})
+    this.setState({hasMnemonicChange: value !== ''})
   }
 
   reset = (e) => {
@@ -93,7 +97,7 @@ class OpenWallet extends PureComponent {
   formRef = r => this.form = r
 
   render() {
-    const camera = <span role="img">&#x1f4f7;</span>  
+    // const camera = <span role="img">&#x1f4f7;</span>  
     const eye = <span role="img">&#x1f441;</span>
 
     const {hasMnemonicChange, newMnemonic, showMnemonic} = this.state
@@ -134,7 +138,7 @@ class OpenWallet extends PureComponent {
               title="Private Mnemonic Phrase Reader"
               message="Hold up your private mnemonic phrase QR code"
               component={click =>
-                <button className="btn btn-primary" onClick={click}>QR ({camera})</button>
+                <button className="btn btn-primary" onClick={click}>QR</button>
               }/>
 
             {!hasMnemonic && <NewWallet newWallet={this.newWallet} />}

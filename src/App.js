@@ -55,15 +55,14 @@ export default class App extends Component {
 
   newWallet = (mnemonic) => {
     const mnemonicId = mnemonicIv(mnemonic, "mnemonicId").readUInt16LE(0)
-    this.setState({ mnemonic, mnemonicId, isBip39: true }, () => {
+    this.setState({ mnemonic, mnemonicId, isBip39: true, newWallet: true }, () => {
       history.push()
     })
   }
 
-  openWallet = (mnemonic, isBip39, newMnemonic) => {
+  openWallet = (mnemonic, isBip39) => {
     const mnemonicId = mnemonicIv(mnemonic, "mnemonicId").readUInt16LE(0)
-    this.setState({ mnemonic, mnemonicId, isBip39, newMnemonic }, () => {
-      // console.log('newMnemonic', newMnemonic)
+    this.setState({ mnemonic, mnemonicId, isBip39, newWallet: false }, () => {
       history.push()
     })
   }
@@ -84,7 +83,7 @@ export default class App extends Component {
   }
 
   render() {
-    const {mnemonic, mnemonicId, isBip39} = this.state
+    const {mnemonic, mnemonicId, isBip39, newWallet} = this.state
     const {wif, pubkey, hint, accountId} = this.state
 
     return (
@@ -117,7 +116,7 @@ export default class App extends Component {
           </div>}
 
           <div className="App-body">
-            {mnemonic && <div>
+            {mnemonic && newWallet && <div>
               <MnemonicKeyCard {...{mnemonic, mnemonicId, isBip39}}/>
               <br />
               <br />
