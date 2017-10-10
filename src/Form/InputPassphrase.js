@@ -29,7 +29,7 @@ export default class EnterPasswordForm extends React.Component {
           <input type="password" style={{display:'none'}}/>
 
           <Input type="password" name="password" id="password" value=""
-            label="Passphrase" autoComplete="off" placeholder="Password"
+            label="Passphrase" autoComplete="off" placeholder="Passphrase"
             componentRef={component => {this.passwordRef = component}}
           />
 
@@ -37,7 +37,7 @@ export default class EnterPasswordForm extends React.Component {
             type="password" name="confirm" label="Confirm" value=""
             autoComplete="off" placeholder="Confirm"
             validations="equalsField:password"
-            validationErrors={{equalsField: 'Passwords must match.'}}
+            validationErrors={{equalsField: 'Passphrases must match.'}}
           />
 
           <ul>
@@ -47,7 +47,7 @@ export default class EnterPasswordForm extends React.Component {
             <li>This passphrase acts like an additional word added the Mnemonic Phrase</li>
             <li>Consider a passphrase you can share with those you trust</li>
             <li>No passphrase, no private key, no funds</li>
-            <li>Password is case sensitive</li>
+            <li>Passphrase is case sensitive</li>
           </ul>
           <br />
 
