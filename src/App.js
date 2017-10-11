@@ -4,17 +4,18 @@ import logo from './LogoData';
 
 import React, {Component} from 'react';
 
-import PrivateKeyCard from './PrivateKeyCard'
-import PublicKeyCard from './PublicKeyCard'
+
 import MnemonicKeyCard from './MnemonicKeyCard'
+import DerivedChildren from './DerivedChildren'
 import InputPassphrase from './Form/InputPassphrase'
 import OpenWallet from './Form/OpenWallet'
+import KeyGen from './Form/KeyGen'
 
 import {EntropyContainer} from './Entropy'
 
 import createHistory from 'history/createBrowserHistory'
 
-import {mnemonicKeyPair, mnemonicIv} from './mnemonic'
+import {mnemonicSeed} from './mnemonic'
 
 const history = createHistory()
 let cpuEntropyBits
@@ -30,7 +31,7 @@ export default class App extends Component {
 
   componentWillMount() {
     // cpuEntropyBits = 0 // fast weeker key (for development only) 
-    // this.newWallet() // short-cuts for development only
+    // this.openWallet('mnemonic') // short-cuts for development only
     // this.onSubmitPassword({password: '', hint: ''}) // dev only
   }
 
@@ -38,13 +39,20 @@ export default class App extends Component {
     history.listen((location, action) => {
       // console.log(action, location.pathname, location.state)
       if(action === 'POP') {
-        if(this.state.accountId) {
+        if(this.state.children) {
+          this.setState({children: null})
+
+        } else if(this.state.wif) {
           this.setState({
             wif: null,
             pubkey: null,
-            accountId: null,
-            hint: null
+            accountId: null
           })
+
+        } else if(this.state.seed) {
+          this.state = App.initialState
+          this.setState()
+
         } else if(this.state.mnemonic) {
           this.state = App.initialState
           this.setState()
@@ -53,37 +61,69 @@ export default class App extends Component {
     })
   }
 
-  newWallet = (mnemonic) => {
-    const mnemonicId = mnemonicIv(mnemonic, "mnemonicId").readUInt16LE(0)
-    this.setState({ mnemonic, mnemonicId, isBip39: true, newWallet: true }, () => {
+  newWallet = (mnemonic, multiWallet) => {
+    const {pubkeyBuffer} = mnemonicSeed(mnemonic)('mnemonicId')
+    const mnemonicId = pubkeyBuffer.readUInt16LE(0)
+    this.setState({
+      mnemonic, mnemonicId,
+      isBip39: true, newWallet: true
+    }, () => {
       history.push()
+      if(!multiWallet) {
+        this.onSubmitPassword({password: ''})
+      }
     })
   }
 
-  openWallet = (mnemonic, isBip39) => {
-    const mnemonicId = mnemonicIv(mnemonic, "mnemonicId").readUInt16LE(0)
-    this.setState({ mnemonic, mnemonicId, isBip39, newWallet: false }, () => {
+  openWallet = (mnemonic, isBip39, multiWallet) => {
+    const {pubkeyBuffer} = mnemonicSeed(mnemonic)('mnemonicId')
+    const mnemonicId = pubkeyBuffer.readUInt16LE(0)
+    this.setState({
+      mnemonic, mnemonicId,
+      isBip39, newWallet: false
+    }, () => {
       history.push()
+      if(!multiWallet) {
+        this.onSubmitPassword({password: ''})
+      }
     })
   }
 
   loginWallet = ({mnemonic, accountId}) => {
-    this.setState({ mnemonic, accountId}, () => {
+    this.setState({mnemonic, accountId}, () => {
       history.push()
     })
   }
 
   onSubmitPassword = ({password, hint}) => {
     const {mnemonic} = this.state
-    const {wif, pubkey, iv} = mnemonicKeyPair(mnemonic, password)
-    const accountId = iv.readUInt16LE(0)
-    this.setState({wif, pubkey, accountId, hint}, () => {
+    const seed = mnemonicSeed(mnemonic, password)
+    this.setState({seed, hint}, () => {
+      // history.push()
+    })
+  }
+
+  backup = () => {
+    this.setState({newWallet: false})
+  }
+
+  keyGenerated = children => {
+    this.setState({children}, () => {
+      history.push()
+    })
+  }
+
+  child = child => {
+    const {wif, pubkey, pubkeyBuffer} = child
+    const accountId = pubkeyBuffer.readUInt16LE(0)
+    this.setState({wif, pubkey, accountId}, () => {
       history.push()
     })
   }
 
   render() {
     const {mnemonic, mnemonicId, isBip39, newWallet} = this.state
+    const {seed, children} = this.state
     const {wif, pubkey, hint, accountId} = this.state
 
     return (
@@ -94,52 +134,52 @@ export default class App extends Component {
             <h3>Wallet Key Tool</h3>
           </div>
           <br />
-
-          {!mnemonic &&
-          <div className="App-intro">
-            <div className="container">
-              <div className="row">
-                <div className="col border border-info rounded">
-                  <OpenWallet
-                    onSubmit={this.openWallet}
-                    newWallet={this.newWallet}
-                    {...{cpuEntropyBits}}
-                  />
+          {!mnemonic ?
+            <div className="App-intro">
+              <div className="container">
+                <div className="row">
+                  <div className="col border border-info rounded">
+                    <OpenWallet
+                      onSubmit={this.openWallet}
+                      newWallet={this.newWallet}
+                      {...{cpuEntropyBits}}
+                    />
+                  </div>
                 </div>
+                {/*<div className="row">
+                  <div className="col border border-info rounded">
+                    <PasswordAccountLogin onSubmit={this.loginWallet} />
+                  </div>
+                </div>*/}
               </div>
-              {/*<div className="row">
-                <div className="col border border-info rounded">
-                  <PasswordAccountLogin onSubmit={this.loginWallet} />
-                </div>
-              </div>*/}
             </div>
-          </div>}
 
-          <div className="App-body">
-            {mnemonic && newWallet && <div>
+          : mnemonic && newWallet ?
+            <div className="App-body">
+              <h1>Backup</h1>
               <MnemonicKeyCard {...{mnemonic, mnemonicId, isBip39}}/>
               <br />
               <br />
-            </div>}
+              <button className="btn btn-primary" onClick={this.backup}>I have made a backup</button>
+            </div>
 
-            {mnemonic && !wif && <div>
+          : mnemonic && !seed ?
+            <div className="App-body">
               <InputPassphrase {...{mnemonicId}} 
                 onSubmit={this.onSubmitPassword}/>
-            </div>}
+            </div>
 
-            {wif && <div>
-              <h1>Warning</h1>
-              <b>The Mnemonic to Private Key calculation will change.</b>
-              <br />
-              <br />
-              <br />
+          : seed && !children ?
+            <div className="App-body">
+              <KeyGen onSubmit={this.keyGenerated} {...{seed}} />
+            </div>
 
-              <PrivateKeyCard {...{wif, pubkey, hint, accountId}}/>
-              <br />
-              <br />
-              <PublicKeyCard {...{pubkey, hint}} />
-            </div>}
-          </div>
+          : children && !wif ?
+            <div className="App-body">
+              <DerivedChildren {...{children, hint}} />
+            </div>
+
+          : null}
         </div>
       </EntropyContainer>
     )

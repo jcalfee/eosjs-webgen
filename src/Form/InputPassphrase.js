@@ -6,16 +6,16 @@ export default class EnterPasswordForm extends React.Component {
     this.passwordRef.element.focus()
   }
 
-  submit = ({password, hint = 'empty'}) => {
+  submit = ({password, hint}) => {
     this.props.onSubmit({password, hint})
   }
 
   render() {
     return (
       <fieldset>
-        <legend>Create Passphrase</legend>
+        <legend>Passphrase (multi-wallet support)</legend>
 
-        Create a short passphrase that will be easy to remember.  This is not the 
+        Enter a short passphrase that will be easy to remember.  This is not the 
         same as a typical password (see points below).
         <br />
         <br />

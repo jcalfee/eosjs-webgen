@@ -39,8 +39,16 @@
   * prevent accidental submission to a server
   * may select and copy multiple element
 */
-.CopyText {
+.CopyPrivateText {
   background-color: lightyellow;
+  border: 1px solid blue;
+  padding-left: .5em;
+  padding-right: .5em;
+  font-family: monospace;
+}
+
+.CopyPublicText {
+  background-color: azure;
   border: 1px solid blue;
   padding-left: .5em;
   padding-right: .5em;

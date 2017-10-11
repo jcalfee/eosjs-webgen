@@ -1,12 +1,13 @@
 import React from 'react';
 import QRCode from 'react-qr';
 
+import AccountIcon from './AccountIcon'
 import SpanSelect from './SpanSelect'
 
-export default ({pubkey, hint}) => (
+export default ({pubkey, path, hint = 'empty', accountId}) => (
   <div>
     <div className="row">
-      <div className="col-4">
+      <div className="col-3">
         <fieldset>
           <legend>Public Key</legend>
           <QRCode text={pubkey}/>
@@ -16,10 +17,14 @@ export default ({pubkey, hint}) => (
       </div>
       <div className="col">
         <fieldset>
-          <legend>EOS Public Key</legend>
-          <SpanSelect className="CopyText">{pubkey}</SpanSelect>
+          <legend>Public Key</legend>
+          <SpanSelect className="CopyPublicText">{pubkey}</SpanSelect>
+          <div style={{float: 'right'}}>
+            <AccountIcon accountId={accountId} />
+          </div>
           <ul>
-            <li>Passphrase Hint: "<u>{hint}</u>"</li>
+            <li>Passphrase Hint: <u>{hint}</u></li>
+            {path && <li>Key dervidation path: <u>{path}</u></li>}
             <li>Give out this public key to receive payments.</li>
             <li>You may use this <b>Public Key</b> as your <b>EOS claim key</b>.</li>
           </ul>

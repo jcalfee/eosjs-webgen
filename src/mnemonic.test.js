@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 const ecc = require('eosjs-ecc')
 const assert = require('assert')
+const HDKey = require('hdkey')
 const {normalize, bip39} = require('bip39-checker')
 const {randomMnemonic} = require('./mnemonic')
 

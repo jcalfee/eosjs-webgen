@@ -10,7 +10,7 @@ import {confirmAlert} from 'react-confirm-alert'
 import 'react-confirm-alert/src/react-confirm-alert.css'
 
 // import Formsy from 'formsy-react'
-import { Form, Input } from 'formsy-react-components'
+import { Form, Input, Checkbox } from 'formsy-react-components'
 
 import autofill from 'react-autofill'
 
@@ -23,9 +23,9 @@ class OpenWallet extends PureComponent {
     cpuEntropyBits: PropTypes.number,
   }
 
-  state = {showMnemonic: false}
+  state = {showMnemonic: false, multiWallet: false}
 
-  submit = ({mnemonic}) => {
+  submit = ({mnemonic, multiWallet}) => {
     const {onSubmit, newWallet} = this.props
     const {newMnemonic} = this.state
 
@@ -33,9 +33,9 @@ class OpenWallet extends PureComponent {
     const v = validSeed(mnemonic)
     if(v.valid) {
       if(newMnemonic) {
-        newWallet(mnemonic)
+        newWallet(mnemonic, multiWallet)
       } else {
-        onSubmit(mnemonic, /*isBip39*/true)
+        onSubmit(mnemonic, /*isBip39*/true, multiWallet)
       }
       return
     }
@@ -124,6 +124,12 @@ class OpenWallet extends PureComponent {
                       className={disableEyeClass}
                       onClick={this.eye}>{eye}</span>
                   }
+                />
+              <div className="col">
+              </div>
+                <Checkbox name="multiWallet"
+                  label="Multi-Wallet"
+                  rowLabel="Prompt for passphrase"
                 />
               </div>
               <div className="col-1">

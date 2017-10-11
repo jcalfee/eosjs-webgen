@@ -29,7 +29,7 @@ export default ({mnemonic, mnemonicId, isBip39}) => (
         </div>
         <fieldset>
           <legend>Private Mnemonic Phrase <small>({isBip39 ? 'Bip39' : 'Unchecked'})</small></legend>
-          <SpanSelect className="CopyText">{mnemonic}</SpanSelect>
+          <SpanSelect className="CopyPrivateText">{mnemonic}</SpanSelect>
           <br />&nbsp;
           <ul>
             <li>You are the only person with this phrase, no phrase no funds</li>
