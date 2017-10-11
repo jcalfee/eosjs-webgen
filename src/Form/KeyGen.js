@@ -14,7 +14,7 @@ export default class KeyGen extends PureComponent {
     const {seed, onSubmit} = this.props
     const children = []
     if(keyType === 'claimkey') {
-      children.push(seed('eos/claimkey'))
+      children.push(seed('eos/eos/claimkey'))
     } else {
       account = account.toLowerCase().trim()
       roles.forEach(role => {

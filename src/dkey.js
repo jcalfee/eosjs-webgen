@@ -16,7 +16,8 @@ function DKey(seed) {
   return path => {
     assert.equal(typeof path, 'string', 'string path required')
     assert(path.indexOf(' ') === -1, 'path should not have spaces')
-
+    assert(!/^\//.test(path), 'path should not start with a slash')
+    assert(!/\/$/.test(path), 'path should not end with a slash')
     return createHash('sha256').update(IL).update(path).digest()
   }
 }
