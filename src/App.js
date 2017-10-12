@@ -62,7 +62,7 @@ export default class App extends Component {
   }
 
   newWallet = (mnemonic, multiWallet) => {
-    const {pubkeyBuffer} = mnemonicSeed(mnemonic)('mnemonicId')
+    const {pubkeyBuffer} = mnemonicSeed(mnemonic)('mnemonic-id')
     const mnemonicId = pubkeyBuffer.readUInt16LE(0)
     this.setState({
       mnemonic, mnemonicId,
@@ -76,7 +76,7 @@ export default class App extends Component {
   }
 
   openWallet = (mnemonic, isBip39, multiWallet) => {
-    const {pubkeyBuffer} = mnemonicSeed(mnemonic)('mnemonicId')
+    const {pubkeyBuffer} = mnemonicSeed(mnemonic)('mnemonic-id')
     const mnemonicId = pubkeyBuffer.readUInt16LE(0)
     this.setState({
       mnemonic, mnemonicId,
