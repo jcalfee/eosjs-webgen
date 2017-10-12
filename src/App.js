@@ -4,9 +4,9 @@ import logo from './LogoData';
 
 import React, {Component} from 'react';
 
-
 import MnemonicKeyCard from './MnemonicKeyCard'
 import DerivedChildren from './DerivedChildren'
+import BackupConfirm from './BackupConfirm'
 import InputPassphrase from './Form/InputPassphrase'
 import OpenWallet from './Form/OpenWallet'
 import KeyGen from './Form/KeyGen'
@@ -160,7 +160,7 @@ export default class App extends Component {
               <MnemonicKeyCard {...{mnemonic, mnemonicId, isBip39}}/>
               <br />
               <br />
-              <button className="btn btn-primary" onClick={this.backup}>I have made a backup</button>
+              <BackupConfirm onClick={this.backup}/>
             </div>
 
           : mnemonic && !seed ?
