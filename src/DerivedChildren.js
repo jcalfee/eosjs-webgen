@@ -39,7 +39,7 @@ export default class DerivedChildren extends PureComponent {
 
     return (
       <div>
-        <h3>Warning: untested key dervidation, subject to change</h3>
+        <h3>Warning: beta key dervidation, this will change</h3>
         <div className="row">
           <div className="col">Path</div>
           <div className="col">Public Key</div>
