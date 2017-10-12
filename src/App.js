@@ -139,18 +139,13 @@ export default class App extends Component {
               <div className="container">
                 <div className="row">
                   <div className="col border border-info rounded">
-                    <OpenWallet
-                      onSubmit={this.openWallet}
-                      newWallet={this.newWallet}
-                      {...{cpuEntropyBits}}
-                    />
+                      <OpenWallet
+                        onSubmit={this.openWallet}
+                        newWallet={this.newWallet}
+                        {...{cpuEntropyBits}}
+                      />
                   </div>
                 </div>
-                {/*<div className="row">
-                  <div className="col border border-info rounded">
-                    <PasswordAccountLogin onSubmit={this.loginWallet} />
-                  </div>
-                </div>*/}
               </div>
             </div>
 

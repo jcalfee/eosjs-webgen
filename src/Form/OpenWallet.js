@@ -112,7 +112,7 @@ class OpenWallet extends PureComponent {
           <fieldset>
             <legend>Open Wallet</legend>
             <div className="row">
-              <div className="col">
+              <div className="col App-body">{/*App-body left-justify form*/}
                 <Input required type={mnemonicInputType}
                   name="mnemonic" label="Mnemonic Phrase"
                   help="Private Mnemonic Phrase (Bip39,&nbsp;12+&nbsp;words)"
@@ -129,7 +129,7 @@ class OpenWallet extends PureComponent {
               </div>
                 <Checkbox name="multiWallet"
                   label="Multi-Wallet"
-                  rowLabel="Prompt for passphrase"
+                  help="Prompt for passphrase"
                 />
               </div>
               <div className="col-1">
