@@ -41,13 +41,13 @@ export default class DerivedChildren extends PureComponent {
       <div>
         <h3>Warning: beta key dervidation, this will change</h3>
         <div className="row">
-          <div className="col">Path</div>
+          <div className="col-2">Path</div>
           <div className="col">Public Key</div>
-          <div className="col-1" title="Show private key">Private&nbsp;Key</div>
+          <div className="col-1" title="Show private key">Private</div>
         </div>
         {keyMenu.map(child => (
           <div className="row">
-            <div className="col">{child.path}</div>
+            <div className="col-2">{child.path}</div>
             <div className="col"><SpanSelect className="CopyPublicText">{child.pubkey}</SpanSelect></div>
             <div className="col-1">
               <a onClick={() => this.show(child.pubkey)} className="badge badge-warning">{label}</a>

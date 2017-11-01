@@ -35,7 +35,6 @@ export default ({mnemonic, mnemonicId, isBip39}) => (
             <li>You are the only person with this phrase, no phrase no funds</li>
             <li>Carefully write down all words in order</li>
             <li>Securely print or photograph this page</li>
-            <li>If saving on a USB or Removable drive, safely eject</li>
             <li>Your funds could be stolen if you use your mnemonic phrase on a malicious/phishing site</li>
           </ul>
         </fieldset>
