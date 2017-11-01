@@ -26,7 +26,7 @@ export default ({pubkey, path, hint = 'empty', accountId}) => (
             <li>Passphrase Hint: <u>{hint}</u></li>
             {path && <li>Key dervidation path: <u>{path}</u></li>}
             <li>Give out this public key to receive payments.</li>
-            <li>You may use this <b>Public Key</b> as your <b>EOS claim key</b>.</li>
+            {path && /\/claimkey$/.test(path) && <li>You may use this <b>Public Key</b> as your <b>EOS claim key</b>.</li>}
           </ul>
         </fieldset>
       </div>
