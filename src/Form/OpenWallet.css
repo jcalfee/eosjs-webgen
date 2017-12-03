@@ -1,13 +1,12 @@
-.mnemonic-component .input-group-addon {
-	background-color: aliceblue !important;
-	border: solid 1px dodgerblue;
-	padding: 0px; 
-}
-
 .DisabledEye {
 	color: darkgray
 }
 
 #OpenWallet_eye {
 	padding: 8px 12px 8px 12px; 
+	background-color: aliceblue !important;
+	border: solid 1px dodgerblue;
 }
+/*.mnemonic-component .input-group-addon {
+	padding: 0px; 
+}*/

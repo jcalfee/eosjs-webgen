@@ -36,7 +36,7 @@ export default class BackupConfirm extends PureComponent {
         </label>
         <br />
         <br />
-        <button className="btn btn-primary"
+        <button className="ui button primary"
           onClick={this.backup} {...{disabled}}>
           I have made a backup
         </button>

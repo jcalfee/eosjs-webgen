@@ -1,16 +1,33 @@
 import React from 'react';
-import { Form, Input } from 'formsy-react-components'
+import PropTypes from 'prop-types';
+// import { Form, Input } from 'formsy-react-components'
+// import {Form} from 'formsy-react'
+// import Input from './Input'
 
 export default class EnterPasswordForm extends React.Component {
-  componentDidMount() {
-    this.passwordRef.element.focus()
+  static propTypes = {
+    autoComplete: PropTypes.bool.isRequired
   }
 
-  submit = ({password, hint}) => {
-    this.props.onSubmit({password, hint})
+  static defaultProps = {
+    autoComplete: false
+  }
+
+  componentDidMount() {
+    this.refs.passphrase.focus()
+  }
+
+  submit = (e) => {
+    e.preventDefault()
+    const {password, hint} = e.target
+    this.props.onSubmit({
+      password: password.value,
+      hint: hint.value
+    })
   }
 
   render() {
+    const {autoComplete} = this.props
     return (
       <fieldset>
         <legend>Passphrase (multi-wallet support)</legend>
@@ -20,25 +37,29 @@ export default class EnterPasswordForm extends React.Component {
         <br />
         <br />
 
-        <Form onValidSubmit={this.submit}>
+        <form onSubmit={this.submit}>
           <h3>Passphrase (optional)</h3>
           <br />
 
-          {/* https://stackoverflow.com/questions/12374442/chrome-browser-ignoring-autocomplete-off */}
-          <input style={{display:'none'}}/>
-          <input type="password" style={{display:'none'}}/>
+          {!autoComplete && <div>
+            {/* https://stackoverflow.com/questions/12374442/chrome-browser-ignoring-autocomplete-off */}
+            <input style={{display:'none'}}/>
+            <input type="password" style={{display:'none'}}/>
+          </div>}
 
-          <Input type="password" name="password" id="password" value=""
-            label="Passphrase" autoComplete="off" placeholder="Passphrase"
-            componentRef={component => {this.passwordRef = component}}
-          />
+          <label for="passphrase">
+            Passphrase
+            <input id="passphrase" type="password" ref="passphrase"
+              placeholder="Passphrase" autoComplete="off"
+            />
+          </label>
 
-          <Input
-            type="password" name="confirm" label="Confirm" value=""
-            autoComplete="off" placeholder="Confirm"
-            validations="equalsField:password"
-            validationErrors={{equalsField: 'Passphrases must match.'}}
-          />
+          <label for="confirm">
+            Confirm
+            <input id="confirm" type="password" ref="confirm"
+              autoComplete="off" placeholder="Confirm"
+            />
+          </label>
 
           <ul>
             <li>This passphrase can be short and easy</li>
@@ -57,13 +78,14 @@ export default class EnterPasswordForm extends React.Component {
           <br />
           <br />
 
-          <Input name="hint" label="Passphrase Hint" placeholder="Hint"
-            componentRef={component => {this.hintRef = component}}
-          />
+          <label for="hint">
+            Passphrase Hint
+            <input id="hint" placeholder="Hint" ref="hint"/>
+          </label>
           <br />
 
-          <input className="btn btn-primary" type="submit" defaultValue="Submit" />
-        </Form>
+          <button className="ui button primary" type="submit">Submit</button>
+        </form>
       </fieldset>
     )
   }

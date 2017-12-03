@@ -35,7 +35,7 @@ export default class NewWallet extends PureComponent {
     
     return (
       // div instead of a button, prevent the password manager from saving an old phrase (being over-written)
-      <div className="btn btn-primary" onClick={this.newWallet}>
+      <div className="ui button primary" onClick={this.newWallet}>
       New Phrase <small>(entropy {<EntropyCount/>}&hellip;)</small>
       </div>
     )

@@ -5,12 +5,9 @@ import NewWallet from './NewWallet'
 import QrReaderDialog from '../QrReaderDialog'
 import {randomMnemonic} from '../mnemonic'
 
-import {suggest, validSeed, normalize} from 'bip39-checker'
 import {confirmAlert} from 'react-confirm-alert'
+import {suggest, validSeed, normalize} from 'bip39-checker'
 import 'react-confirm-alert/src/react-confirm-alert.css'
-
-// import Formsy from 'formsy-react'
-import { Form, Input, Checkbox } from 'formsy-react-components'
 
 import autofill from 'react-autofill'
 
@@ -25,11 +22,13 @@ class OpenWallet extends PureComponent {
 
   state = {showMnemonic: false, multiWallet: false}
 
-  submit = ({mnemonic, multiWallet}) => {
+  submit = (e) => {
+    e.preventDefault()
     const {onSubmit, newWallet} = this.props
     const {newMnemonic} = this.state
+    const mnemonic = normalize(this.refs.mnemonic.value)
+    const multiWallet = this.refs.multiWallet.value
 
-    mnemonic = normalize(mnemonic)
     const v = validSeed(mnemonic)
     if(v.valid) {
       if(newMnemonic) {
@@ -78,23 +77,22 @@ class OpenWallet extends PureComponent {
 
   scan = mnemonic => this.submit({mnemonic})
 
-  mnemonicChange = (name, value) => {
+  mnemonicChange = ({target: {value}}) => {
     this.setState({hasMnemonicChange: value !== ''})
   }
 
   reset = (e) => {
-    this.form.formsyForm.reset()
-    this.setState({hasMnemonicChange: false, newMnemonic: null})
+    this.setState({hasMnemonicChange: false, newMnemonic: null}, () => {
+      this.refs.form.reset()
+    })
   }
 
-  newWallet = () => {
+  newWallet = (e) => {
     this.reset()
     const {cpuEntropyBits} = this.props
     const newMnemonic = randomMnemonic(12, cpuEntropyBits)
     this.setState({newMnemonic})
   }
-
-  formRef = r => this.form = r
 
   render() {
     // const camera = <span role="img">&#x1f4f7;</span>  
@@ -106,57 +104,66 @@ class OpenWallet extends PureComponent {
     const mnemonicInputType = showMnemonic ? 'text' : 'password'
 
     const hasMnemonic = hasMnemonicChange || newMnemonic
+    // label="Mnemonic Phrase"
     return (
       <div>
-        <Form onValidSubmit={this.submit} ref={this.formRef}>
+        <form onSubmit={this.submit} ref="form">
           <fieldset>
             <legend>Open Wallet</legend>
-            <div className="row">
-              <div className="col App-body">{/*App-body left-justify form*/}
-                <Input required type={mnemonicInputType}
-                  name="mnemonic" label="Mnemonic Phrase"
-                  help="Private Mnemonic Phrase (Bip39,&nbsp;12+&nbsp;words)"
-                  value={newMnemonic}
+            <div className="ui container">
+              <div className="ui fluid icon input">
+                <input
+                  required
+                  ref="mnemonic"
+                  type={mnemonicInputType}
+                  defaultValue={newMnemonic}
                   onChange={this.mnemonicChange}
-                  elementWrapperClassName="mnemonic-component"
-                  addonAfter={
-                    <span id="OpenWallet_eye" title="Show / Hide"
-                      className={disableEyeClass}
-                      onClick={this.eye}>{eye}</span>
-                  }
                 />
-              <div className="col">
+                <div onClick={this.eye} id="OpenWallet_eye">
+                  <i title="Show / Hide"
+                    className={`${disableEyeClass} icon`}
+                  >{eye}</i>
+                </div>
               </div>
-                <Checkbox name="multiWallet"
-                  label="Multi-Wallet"
-                  help="Prompt for passphrase"
-                />
+              <div>
+                Private Mnemonic Phrase (Bip39,&nbsp;12+&nbsp;words)
               </div>
-              <div className="col-1">
-                &nbsp;
+            </div>
+
+            <div>
+              <div className="ui column">
+                <div>
+                  <label for="multiWallet">
+                    Prompt for passphrase (Multi-Wallet)
+                    <input
+                      type="checkbox"
+                      id="multiWallet"
+                      ref="multiWallet"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
             <br />
 
-            <button className="btn btn-primary">Open</button>
+            <button className="ui button primary">Open</button>
 
             <QrReaderDialog scan={this.scan}
               title="Private Mnemonic Phrase Reader"
               message="Hold up your private mnemonic phrase QR code"
               component={click =>
-                <button className="btn btn-primary" onClick={click}>QR</button>
+                <button className="ui button primary" onClick={click}>QR</button>
               }/>
 
             {!hasMnemonic && <NewWallet newWallet={this.newWallet} />}
-            {hasMnemonic && <button className="btn btn-primary" type="reset" onClick={this.reset}>Reset</button>}
+            {hasMnemonic && <button className="ui button primary" type="reset" onClick={this.reset}>Reset</button>}
             <br/>
             <br/>
 
           </fieldset>
-        </Form>
+        </form>
       </div>
     )
   }
 }
-
 export default autofill(OpenWallet)

@@ -1,5 +1,6 @@
 import './App.css';
-import './bootstrap.css';
+// import './bootstrap.css';
+
 import logo from './LogoData';
 
 import React, {Component} from 'react';
@@ -136,7 +137,7 @@ export default class App extends Component {
           <br />
           {!mnemonic ?
             <div className="App-intro">
-              <div className="container">
+              <div className="ui container">
                 <div className="row">
                   <div className="col border border-info rounded">
                       <OpenWallet

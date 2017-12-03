@@ -1,6 +1,8 @@
 import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Input, RadioGroup, CheckboxGroup} from 'formsy-react-components'
+// import {Form, Input, RadioGroup, CheckboxGroup} from 'formsy-react-components'
+import {Form} from 'formsy-react'
+import Input from './Input'
 
 export default class KeyGen extends PureComponent {
   static PropTypes = {
@@ -41,43 +43,43 @@ export default class KeyGen extends PureComponent {
 
   render() {
     const {keyType} = this.state
-
-    return (
-      <fieldset>
-        <legend>Derive Key</legend>
-
-        Create keys from your mnemonic phrase.
-        <br />
-        <br />
-
-        <Form onValidSubmit={this.submit}>
-          <RadioGroup
-            name="keyType"
-            label="Key Type"
-            help="Select your key type."
-            options={KeyGen.keyTypes}
-            onChange={this.keyType}
-            required
-          />
-
-          {keyType === 'rolekey' && <div>
-            <Input type="text" name="account" label="Account" required  
-              componentRef={component => {component && component.element.focus()}}
-              placeholder="Account Name"
-            />
-            <CheckboxGroup
-              name="roles" label="Roles"
-              help="Select each role needing a key."
-              options={KeyGen.roles}
-              required
-            />
-          </div>}
-
-          <br />
-          <input className="btn btn-primary" type="submit" defaultValue="Submit" />
-        </Form>
-      </fieldset>
-    )
+    return <div></div>
+    // return (
+    //   <fieldset>
+    //     <legend>Derive Key</legend>
+    // 
+    //     Create keys from your mnemonic phrase.
+    //     <br />
+    //     <br />
+    // 
+    //     <Form onValidSubmit={this.submit}>
+    //       <RadioGroup
+    //         name="keyType"
+    //         label="Key Type"
+    //         help="Select your key type."
+    //         options={KeyGen.keyTypes}
+    //         onChange={this.keyType}
+    //         required
+    //       />
+    // 
+    //       {keyType === 'rolekey' && <div>
+    //         <Input type="text" name="account" label="Account" required  
+    //           componentRef={component => {component && component.element.focus()}}
+    //           placeholder="Account Name"
+    //         />
+    //         <CheckboxGroup
+    //           name="roles" label="Roles"
+    //           help="Select each role needing a key."
+    //           options={KeyGen.roles}
+    //           required
+    //         />
+    //       </div>}
+    // 
+    //       <br />
+    //       <input className="ui button primary" type="submit" defaultValue="Submit" />
+    //     </Form>
+    //   </fieldset>
+    // )
   }
 }
 // <li>Secure this information as if it were worth your weight in gold</li>
